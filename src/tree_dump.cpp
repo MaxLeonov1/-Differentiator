@@ -7,10 +7,18 @@
 #include <stdarg.h>
 
 #include "tree.h"
+#include "differentiator.h"
+#include "sup_func.h"
 
 #pragma GCC diagnostic ignored "-Wformat=2"
 #pragma GCC diagnostic ignored "-Wformat-overflow"
 #pragma GCC diagnostic ignored "-Wformat-truncation"
+
+/*=====================================================================================*/
+
+#define NUM_COL_ "fillcolor=\"#4CAF50\", color=\"#2E7D32\""
+#define VAR_COL_ "fillcolor=\"#FF9800\", color=\"#EF6C00\""
+#define OP_COL_  "fillcolor=\"#2196F3\", color=\"#1565C0\""
 
 /*=====================================================================================*/
 
@@ -205,21 +213,59 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
     int idx_left = 0;
     int idx_right = 0;
 
+    char data[MAX_STR_LEN_] = "";
+    const char* type  = "";
+    const char* color = "";
+
     if(rank == 1) idx = 0;
 
     if (node->left)  idx_left  = PrintGraphNodes(node->left,  rank+1, graph_text);
     if (node->right) idx_right = PrintGraphNodes(node->right, rank+1, graph_text);
 
+    switch(node->type){
+        case Node_t::NUM:
+            type = "NUM";
+            color = NUM_COL_;
+            printf ("%lf\n", node->data.num);
+            sprintf(
+                data, 
+                "[%lf]", 
+                node->data.num
+            );
+            break;
+
+        case Node_t::OP:
+            type = "OPER";
+            color = OP_COL_;
+            sprintf(
+                data, 
+                "[%s(%s)]", 
+                OperInstructions[node->data.oper].f_name, 
+                OperInstructions[node->data.oper].name
+            );
+            break;
+
+        case Node_t::VAR:
+            type = "VAR";
+            color = VAR_COL_;
+            sprintf(
+                data,
+                "[code: %d]",
+                node->data.var_idx
+            );
+            break;
+    }
+
     fprintf(
         graph_text, 
-        "node_%d[shape=Mrecord, rank=%d, "
-        "label=\" { %p | data: [%s] | { hash: %u | is_aloc: %d } | parent: %p | { Left: %p | Right: %p } } \",];\n",
+        "node_%d[shape=Mrecord, rank=%d, %s"
+        "label=\" { %p | type: %s | data: %s |  parent: %p | { Left: %p | Right: %p } } \",];\n",
         idx,
         rank,
+        color,
         node,
-        node->data,
-        node->data_hash,
-        node->is_alloc,
+        type,
+        data,
         node->parent,
         node->left,
         node->right
@@ -228,7 +274,7 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
     if (node->left) {
         fprintf(
             graph_text,
-            "node_%d -> node_%d["EDGE_STD_SET_", label=\"Yes\"];\n",
+            "node_%d -> node_%d["EDGE_STD_SET_"];\n",
             idx, idx_left
         );
             
@@ -237,7 +283,7 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
     if (node->right) {
         fprintf(
             graph_text,
-            "node_%d -> node_%d["EDGE_STD_SET_", label=\"No\"];\n",
+            "node_%d -> node_%d["EDGE_STD_SET_"];\n",
             idx, idx_right
         );
         

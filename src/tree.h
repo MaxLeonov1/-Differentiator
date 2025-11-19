@@ -1,50 +1,18 @@
 #pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "differentiator.h"
 
 #define _DEBUG
 
 /*=====================================================================================*/
 
-typedef char* TreeElem_t;
+typedef char*  TreeElem_t;
 typedef struct TreeNode TreeNode_t;
 typedef struct Tree Tree_t;
 typedef struct TreeDebugInfo TreeDebugInfo_t;
-
-/*=====================================================================================*/
-
-struct TreeDebugInfo {
-
-    const char* name;
-    const char* func;
-    const char* file;
-    const int line;
-
-};
-
-struct TreeNode {
-
-    TreeElem_t   data;
-    unsigned int data_hash;
-    TreeNode_t*  left;
-    TreeNode_t*  right;
-    TreeNode_t*  parent;
-    int          is_alloc;
-
-};
-
-struct Tree {
-
-    #ifdef _DEBUG
-    TreeDebugInfo_t info;
-    #endif
-
-    TreeNode_t* root;
-
-    size_t cpcty; //TODO: make cpcty changing
-    char* buffer; 
-
-};
 
 /*=====================================================================================*/
 
@@ -62,13 +30,62 @@ typedef enum {
 
 /*=====================================================================================*/
 
+typedef enum{
+
+    OP = 0,
+    VAR = 1,
+    NUM = 3,
+
+} Node_t;
+
+typedef union {
+
+    double num;
+    size_t var_idx;
+    Oper_t oper;
+
+} Val_t;
+
+struct TreeNode {
+
+    Node_t      type;
+    Val_t       data;
+    TreeNode_t* left;
+    TreeNode_t* right;
+    TreeNode_t* parent;
+
+};
+
+struct TreeDebugInfo {
+
+    const char* name;
+    const char* func;
+    const char* file;
+    const int line;
+
+};
+
+struct Tree {
+
+    #ifdef _DEBUG
+    TreeDebugInfo_t info;
+    #endif
+
+    TreeNode_t* root;
+
+    size_t cpcty; 
+    char* buffer; 
+
+};
+
+/*=====================================================================================*/
+
 void      TreeCtor        ( Tree_t* tree );
 TreeErr_t TreeDtor        ( Tree_t* tree );
-TreeErr_t AllocNode       ( TreeNode_t** node );
+TreeErr_t AllocNode       ( TreeNode_t** node, Node_t node_t, Val_t value_t );
 void      CreateLogDir    ( char* dir_name );
 TreeErr_t DeleteNode      ( TreeNode* node );
-TreeErr_t InsertNode      ( TreeNode_t** node, TreeElem_t elem, TreeNode_t* prev_node );
-TreeErr_t InsertNodeAfter ( TreeNode_t* node, TreeElem_t elem, int child );
+TreeErr_t InsertNode      ( TreeNode_t** node, Val_t* value, Node_t node_t, TreeNode_t* prev_node );
 
 TreeErr_t   SaveToDisk   ( Tree_t* tree, const char* disk_name );
 void        WriteToDisk  ( TreeNode_t* node, FILE* disk );
@@ -129,13 +146,13 @@ void CreateGraphImg ( Tree_t* tree, const char* graphname, const char* graph_dir
 #define TREE_STAT_CHECK_                              \
     if ( status != TreeErr_t::TREE_OK ) return status; \
 
-#define NODE_INIT_(node_ptr)    \
-    node_ptr->left = nullptr;   \
-    node_ptr->right = nullptr;  \
-    node_ptr->data = nullptr;   \
-    node_ptr->parent = nullptr; \
-    node_ptr->data_hash = 0;    \
-    node_ptr->is_alloc = 1;     \
+// #define NODE_INIT_(node_ptr)    \
+//     node_ptr->left = nullptr;   \
+//     node_ptr->right = nullptr;  \
+//     node_ptr->data = nullptr;   \
+//     node_ptr->parent = nullptr; \
+//     node_ptr->data_hash = 0;    \
+//     node_ptr->is_alloc = 1;     \
 
 #define SKIP_SPACE_ while (buffer[*pos] == ' ') (*pos)++;
 
