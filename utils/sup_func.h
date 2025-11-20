@@ -24,3 +24,4 @@ long long FileByteCount ( const char* filename );
 unsigned int djb2hash ( const char *str );
 int skip_space ( char* ptr, size_t* pos );
 char* my_strdup(const char* str);
+int   double_cmp (double double_1, double double_2);

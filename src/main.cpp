@@ -22,8 +22,11 @@ int main() {
 
     //diff_1.forest[1]->root = CopyTree(diff_1.forest[0]->root, nullptr);
 
-    FindDerivative(&tree_1, &tree_2, 1);
+    FindDerivative(&tree_1, &tree_2, 0);
     diff_1.tree_num = 2;
+
+    FindValue(&diff_1, 0);
+    FindValue(&diff_1, 1);
 
     TreeDump(&diff_1, 0, TreeErr_t::TREE_OK, nullptr);
     TreeDump(&diff_1, 1, TreeErr_t::TREE_OK, nullptr);

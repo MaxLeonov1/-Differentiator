@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <math.h>
 
 #include "sup_func.h"
 
@@ -60,4 +61,13 @@ char* my_strdup(const char* str) {
     }
     
     return copy;
+}
+
+/*=====================================================================================*/
+
+int double_cmp (double double_1, double double_2) {
+
+    const double error = 1e-6;
+
+    return (fabs (double_1 - double_2) < error) ? 1 : 0;
 }
