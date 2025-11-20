@@ -39,16 +39,16 @@ void WriteToDisk ( TreeNode_t* node, Var_t* name_table, FILE* disk ) {
 
     switch(node->type) {
         case Node_t::NUM:
-            fprintf(disk, "( \"%lf\" ", node->data.num);
+            fprintf(disk, "( %.2lf ", node->data.num);
             break;
         case Node_t::OP_BIN:
-            fprintf(disk, "( \"%s\" ", OperInstructions[node->data.oper].name);
+            fprintf(disk, "( %s ", OperInstructions[node->data.oper].name);
             break;
         case Node_t::OP_UN:
-            fprintf(disk, "( \"%s\" ", OperInstructions[node->data.oper].name);
+            fprintf(disk, "( %s ", OperInstructions[node->data.oper].name);
             break;
         case Node_t::VAR:
-            fprintf(disk, "( \"%s\" ", name_table[node->data.var_idx].name);
+            fprintf(disk, "( %s ", name_table[node->data.var_idx].name);
             break;
     }
 
@@ -170,22 +170,22 @@ TreeErr_t CreateNodeFromStr ( const char* str, Diff_t* diff, TreeNode_t** new_no
 
     _OK_STAT_
 
-    for (size_t i = 0; i < diff->op_num; i++) {
+    int str_hash = djb2hash(str);
+    int idx = HashBinSearch(diff->sort_op_instr, diff->op_num, str_hash);
 
-        if (strcmp(str, diff->def_op_instr[i].name) == 0) {
+    if (idx != -1) {
 
-            Node_t type = Node_t::OP_BIN;
-            if (diff->def_op_instr[i].is_sing)
-                type = Node_t::OP_UN;
+        Node_t type = Node_t::OP_BIN;
+        if (diff->sort_op_instr[idx].is_sing)
+            type = Node_t::OP_UN;
 
-            TreeNode_t* node = nullptr;
-            status = AllocNode(&node, type);
-            TREE_STAT_CHECK_
-            
-            node->data.oper = diff->def_op_instr[i].code;
-            *new_node = node;
-            _RET_OK_
-        }
+        TreeNode_t* node = nullptr;
+        status = AllocNode(&node, type);
+        TREE_STAT_CHECK_
+                
+        node->data.oper = diff->sort_op_instr[idx].code;
+        *new_node = node;
+        _RET_OK_
     }
 
     char* endptr = nullptr;

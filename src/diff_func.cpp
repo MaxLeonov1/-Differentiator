@@ -167,6 +167,32 @@ TreeNode_t* Differentiate ( TreeNode_t* node, TreeNode_t* prev_node, size_t dir_
 
 
 
+#undef nR_
+#undef nL_ 
+#undef nP_ 
+#undef nT_ 
+
+#undef SUM_ 
+#undef MUL_ 
+#undef SUB_ 
+#undef DIV_ 
+
+#undef SIN_ 
+#undef COS_ 
+#undef TG_  
+#undef CTG_ 
+
+#undef dL_ 
+#undef dR_ 
+#undef cL_ 
+#undef cR_ 
+
+#undef CB_
+#undef CU_
+#undef CN_
+
+
+
 TreeErr_t FindValue (Diff_t* diff, int tree_idx) {
 
     assert(diff);
@@ -206,11 +232,6 @@ double CalcTree (TreeNode_t* node, Diff_t* diff ) {
         }
 
         case Node_t::VAR: {
-            printf(
-                "%d %lf\n",
-                node->data.var_idx,
-                diff->name_table.buff[node->data.var_idx].val
-            );
             return diff->name_table.buff[node->data.var_idx].val;
         }
 

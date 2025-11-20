@@ -19,7 +19,7 @@ void CreateTexLog (Diff_t* diff, int tree_idx, const char* filename) {
     fprintf(file, "Equation:\n");
     fprintf(file, "\\begin{equation*} \n");
     TreeDumpTex(diff->forest[tree_idx]->root, file, diff);
-    fprintf(file, " \\end{equation*}\n\n");
+    fprintf(file, " \n\\end{equation*}\n\n");
     
     fprintf(file, "\\end{document}\n");
     fclose(file);
