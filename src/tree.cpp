@@ -111,18 +111,18 @@ TreeErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t
 
 TreeNode_t* CopyTree ( TreeNode_t* node, TreeNode_t* prev_node ) {
 
+    if (node == nullptr) return nullptr;
+
     TreeNode_t* new_node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!new_node) return new_node;
+    if (new_node == nullptr) return new_node;
 
     new_node->data.num = node->data.num;
-    new_node->data.oper = node->data.oper;
-    new_node->data.var_idx = node->data.var_idx;
     new_node->parent = prev_node;
     new_node->type = node->type;
 
-    if(new_node->left)
+    if(node->left != nullptr)
         new_node->left = CopyTree (node->left, new_node);
-    if(new_node->right)
+    if(node->right != nullptr)
         new_node->right = CopyTree (node->right, new_node);
 
     return new_node;

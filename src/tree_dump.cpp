@@ -73,7 +73,7 @@ void CreateLogDir ( char* dir_name ) {
 
 /*=====================================================================================*/
 
-void TreeDump ( Diff_t* diff, TreeErr_t status, const char* format, ... ) {
+void TreeDump ( Diff_t* diff, int tree_idx, TreeErr_t status, const char* format, ... ) {
 
     assert(diff);
 
@@ -108,13 +108,13 @@ void TreeDump ( Diff_t* diff, TreeErr_t status, const char* format, ... ) {
         va_end(args);
     }
 
-    PrintLogHeader ( diff->tree, log_file, status );
+    PrintLogHeader ( diff->forest[tree_idx], log_file, status );
     
     fprintf ( log_file, "<h3>[IMG]:</h3>\n" );
 
-    if (diff->tree->root) {
+    if (diff->forest[tree_idx]->root) {
 
-        CreateGraphImg ( diff, graphname, log_dir );
+        CreateGraphImg ( diff, tree_idx, graphname, log_dir );
         fprintf ( 
             log_file, 
             "<img "
@@ -169,7 +169,7 @@ void PrintLogHeader ( Tree_t* tree, FILE* log_file, TreeErr_t status ) {
 
 /*=====================================================================================*/
 
-void CreateGraphImg ( Diff_t* diff, const char* graphname, const char* graph_dir ) {
+void CreateGraphImg ( Diff_t* diff, int tree_idx, const char* graphname, const char* graph_dir ) {
 
     assert(diff);
     assert(graphname);
@@ -191,7 +191,7 @@ void CreateGraphImg ( Diff_t* diff, const char* graphname, const char* graph_dir
               " style=\"filled,bold\", fillcolor = \"#fff0b3\", color = \"#ffe680\"];\n"
               );
     
-    PrintGraphNodes(diff->tree->root, 1, graph_text, diff);
+    PrintGraphNodes(diff->forest[tree_idx]->root, 1, graph_text, diff);
 
     fprintf ( graph_text, "}" );
     fclose ( graph_text );

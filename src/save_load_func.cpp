@@ -7,10 +7,10 @@
 
 /*=====================================================================================*/
 
-TreeErr_t SaveToDisk ( Diff_t* diff, const char* disk_name ) {
+TreeErr_t SaveToDisk ( Diff_t* diff, int tree_idx, const char* disk_name ) {
 
     assert(diff);
-    assert(diff->tree);
+    assert(diff->forest[tree_idx]);
 
     if (disk_name == nullptr)
         disk_name = DEF_DISK_NAME_;
@@ -18,9 +18,9 @@ TreeErr_t SaveToDisk ( Diff_t* diff, const char* disk_name ) {
     FILE* disk = fopen( disk_name, "wb" );
     if (disk == nullptr) return TreeErr_t::FILE_OPEN_ERR;
 
-    if (!diff->tree->root) return TreeErr_t::EMPTY_TREE_ACT_ERR;
+    if (!diff->forest[tree_idx]->root) return TreeErr_t::EMPTY_TREE_ACT_ERR;
 
-    WriteToDisk(diff->tree->root, diff->name_table.buff, disk);
+    WriteToDisk(diff->forest[tree_idx]->root, diff->name_table.buff, disk);
 
     fclose(disk);
 
@@ -79,17 +79,17 @@ TreeErr_t ReadFromDisk (Diff_t* diff, const char* filename ) {
     if (!file) return TreeErr_t::FILE_OPEN_ERR;
     long long byte_num = FileByteCount(filename);
 
-    diff->tree->buffer = (char*)calloc((size_t)byte_num + _buff_byte_padding_, sizeof(diff->tree->buffer[0]));
-    if (!diff->tree->buffer) return TreeErr_t::MEM_ALLOC_ERR;
-    fread(diff->tree->buffer, sizeof(diff->tree->buffer[0]), (size_t)byte_num + _buff_byte_padding_, file);
+    diff->forest[0]->buffer = (char*)calloc((size_t)byte_num + _buff_byte_padding_, sizeof(diff->forest[0]->buffer[0]));
+    if (!diff->forest[0]->buffer) return TreeErr_t::MEM_ALLOC_ERR;
+    fread(diff->forest[0]->buffer, sizeof(diff->forest[0]->buffer[0]), (size_t)byte_num + _buff_byte_padding_, file);
 
     size_t pos = 0;
 
-    diff->tree->root = ReadNode(diff->tree->buffer, &pos, &status, diff);
+    diff->forest[0]->root = ReadNode(diff->forest[0]->buffer, &pos, &status, diff);
 
     if (status == TreeErr_t::READ_SYNTAX_ERR ) {
         //printf("%d %s\n", pos, tree->buffer);
-        TreeDump(diff, status, &diff->tree->buffer[pos]);
+        TreeDump(diff, 0, status, &diff->forest[0]->buffer[pos]);
         return status; 
 
     } else if (status != TreeErr_t::TREE_OK )
@@ -127,7 +127,7 @@ TreeNode_t* ReadNode ( char* buffer, size_t* pos, TreeErr_t* status, Diff_t* dif
         if (*status != TreeErr_t::TREE_OK)
             return nullptr;
 
-        diff->tree->cpcty++;
+        diff->forest[0]->cpcty++;
 
         //printf("%s\n", &buffer[*pos]);
         SKIP_SPACE_

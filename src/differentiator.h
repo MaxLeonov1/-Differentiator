@@ -78,7 +78,8 @@ typedef struct {
 
     int op_num;
 
-    Tree_t* tree;
+    int tree_num;
+    Tree_t** forest;
 
     OperInstr_t* def_op_instr;
     OperInstr_t* sort_op_instr;
@@ -89,7 +90,8 @@ typedef struct {
 
 #define DIFF_INIT(name) Diff_t name = { \
     .op_num = 0,                        \
-    .tree = nullptr,                    \
+    .tree_num = 0,                      \
+    .forest = nullptr,                  \
     .def_op_instr = nullptr,            \
     .sort_op_instr = nullptr,           \
     .name_table = {                     \

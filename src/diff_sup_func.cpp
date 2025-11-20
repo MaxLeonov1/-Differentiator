@@ -73,6 +73,9 @@ DiffErr_t DiffCtor ( Diff_t* diff ) {
 
     diff->op_num = sizeof(OperInstructions)/sizeof(OperInstructions[0]);
 
+
+    diff->forest = (Tree_t**)calloc(10, sizeof(Tree_t*));
+
     diff->def_op_instr = (OperInstr_t*)calloc(diff->op_num, sizeof(OperInstr_t));
     diff->sort_op_instr = (OperInstr_t*)calloc(diff->op_num, sizeof(OperInstr_t));
 
@@ -93,6 +96,11 @@ void DiffDtor ( Diff_t* diff ) {
 
     free(diff->def_op_instr);
     free(diff->sort_op_instr);
+
+    for (size_t idx = 0; idx<diff->tree_num; idx++) {
+        TreeDtor(diff->forest[idx]);
+    }
+    free(diff->forest);
 
     if (diff->name_table.buff) {
         for (size_t idx = 0; idx<diff->name_table.num; idx++) {

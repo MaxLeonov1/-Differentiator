@@ -5,7 +5,7 @@
 
 
 
-void CreateTexLog (Diff_t* diff, const char* filename) {
+void CreateTexLog (Diff_t* diff, int tree_idx, const char* filename) {
 
     FILE* file = fopen ( filename, "wb" );
     if ( file == nullptr ) exit(0);
@@ -18,7 +18,7 @@ void CreateTexLog (Diff_t* diff, const char* filename) {
     
     fprintf(file, "Equation:\n");
     fprintf(file, "\\begin{equation*} \n");
-    TreeDumpTex(diff->tree->root, file, diff);
+    TreeDumpTex(diff->forest[tree_idx]->root, file, diff);
     fprintf(file, " \\end{equation*}\n\n");
     
     fprintf(file, "\\end{document}\n");

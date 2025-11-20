@@ -85,6 +85,8 @@ TreeErr_t FindDerivative ( Tree_t* tree, Tree_t* new_tree, size_t dir_var ) {
 
     new_tree->root = Differentiate ( tree->root, nullptr, dir_var);
 
+    _RET_OK_
+
 }
 
 
@@ -149,3 +151,7 @@ TreeNode_t* Differentiate ( TreeNode_t* node, TreeNode_t* prev_node, size_t dir_
     }
 
 }
+
+
+
+//TreeErr_t FindValue (Diff_t* diff, )
