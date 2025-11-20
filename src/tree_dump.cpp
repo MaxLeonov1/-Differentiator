@@ -73,9 +73,9 @@ void CreateLogDir ( char* dir_name ) {
 
 /*=====================================================================================*/
 
-void TreeDump ( Tree_t* tree, TreeErr_t status, const char* format, ... ) {
+void TreeDump ( Diff_t* diff, TreeErr_t status, const char* format, ... ) {
 
-    assert(tree);
+    assert(diff);
 
     static int call_num = 1;
     char filename[MAX_STR_LEN_] = "";
@@ -108,13 +108,13 @@ void TreeDump ( Tree_t* tree, TreeErr_t status, const char* format, ... ) {
         va_end(args);
     }
 
-    PrintLogHeader ( tree, log_file, status );
+    PrintLogHeader ( diff->tree, log_file, status );
     
     fprintf ( log_file, "<h3>[IMG]:</h3>\n" );
 
-    if (tree->root) {
+    if (diff->tree->root) {
 
-        CreateGraphImg ( tree, graphname, log_dir );
+        CreateGraphImg ( diff, graphname, log_dir );
         fprintf ( 
             log_file, 
             "<img "
@@ -169,9 +169,9 @@ void PrintLogHeader ( Tree_t* tree, FILE* log_file, TreeErr_t status ) {
 
 /*=====================================================================================*/
 
-void CreateGraphImg ( Tree_t* tree, const char* graphname, const char* graph_dir ) {
+void CreateGraphImg ( Diff_t* diff, const char* graphname, const char* graph_dir ) {
 
-    assert(tree);
+    assert(diff);
     assert(graphname);
     assert(graph_dir);
 
@@ -191,7 +191,7 @@ void CreateGraphImg ( Tree_t* tree, const char* graphname, const char* graph_dir
               " style=\"filled,bold\", fillcolor = \"#fff0b3\", color = \"#ffe680\"];\n"
               );
     
-    PrintGraphNodes(tree->root, 1, graph_text);
+    PrintGraphNodes(diff->tree->root, 1, graph_text, diff);
 
     fprintf ( graph_text, "}" );
     fclose ( graph_text );
@@ -204,7 +204,7 @@ void CreateGraphImg ( Tree_t* tree, const char* graphname, const char* graph_dir
 
 
 
-int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
+int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text, Diff_t* diff) {
 
     assert(node);
     assert(graph_text);
@@ -219,14 +219,13 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
 
     if(rank == 1) idx = 0;
 
-    if (node->left)  idx_left  = PrintGraphNodes(node->left,  rank+1, graph_text);
-    if (node->right) idx_right = PrintGraphNodes(node->right, rank+1, graph_text);
+    if (node->left)  idx_left  = PrintGraphNodes(node->left,  rank+1, graph_text, diff);
+    if (node->right) idx_right = PrintGraphNodes(node->right, rank+1, graph_text, diff);
 
     switch(node->type){
         case Node_t::NUM:
             type = "NUM";
             color = NUM_COL_;
-            printf ("%lf\n", node->data.num);
             sprintf(
                 data, 
                 "[%lf]", 
@@ -234,14 +233,25 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
             );
             break;
 
-        case Node_t::OP:
-            type = "OPER";
+        case Node_t::OP_BIN:
+            type = "OPER_BIN";
             color = OP_COL_;
             sprintf(
                 data, 
                 "[%s(%s)]", 
-                OperInstructions[node->data.oper].f_name, 
-                OperInstructions[node->data.oper].name
+                diff->def_op_instr[node->data.oper].f_name, 
+                diff->def_op_instr[node->data.oper].name
+            );
+            break;
+
+        case Node_t::OP_UN:
+            type = "OPER_UN";
+            color = OP_COL_;
+            sprintf(
+                data, 
+                "[%s(%s)]", 
+                diff->def_op_instr[node->data.oper].f_name, 
+                diff->def_op_instr[node->data.oper].name
             );
             break;
 
@@ -250,8 +260,9 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text) {
             color = VAR_COL_;
             sprintf(
                 data,
-                "[code: %d]",
-                node->data.var_idx
+                "[ %d '%s')]",
+                node->data.var_idx,
+                diff->name_table.buff[node->data.var_idx].name
             );
             break;
     }

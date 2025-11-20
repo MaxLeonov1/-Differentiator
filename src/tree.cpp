@@ -37,7 +37,7 @@ TreeErr_t TreeDtor ( Tree_t* tree ) {
 
 /*=====================================================================================*/
 
-TreeErr_t AllocNode ( TreeNode_t** node, Node_t node_t, Val_t value_t ) {
+TreeErr_t AllocNode ( TreeNode_t** node, Node_t node_t ) {
 
     assert(node);
 
@@ -75,23 +75,29 @@ TreeErr_t DeleteNode ( TreeNode* node ) {
 
 /*=====================================================================================*/
 
-TreeErr_t InsertNode ( TreeNode_t** node, Val_t* value, Node_t node_t, TreeNode_t* prev_node ) {
+TreeErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t* prev_node ) {
 
     assert(node);
     _OK_STAT_
 
     TreeNode_t* node_new = nullptr;
-    status = AllocNode(&node_new, node_t, *value);
+    status = AllocNode(&node_new, node_t);
     TREE_STAT_CHECK_
 
     switch(node_t) {
 
         case Node_t::NUM:
-            node_new->data.num = value->num;
+            node_new->data.num = value.num;
+            break;
         case Node_t::VAR:
-            node_new->data.var_idx = value->var_idx;
-        case Node_t::OP:
-            node_new->data.oper = value->oper;
+            node_new->data.var_idx = value.var_idx;
+            break;
+        case Node_t::OP_BIN:
+            node_new->data.oper = value.oper;
+            break;
+        case Node_t::OP_UN:
+            node_new->data.oper = value.oper;
+            break;
     }
 
     node_new->parent = prev_node;
@@ -103,26 +109,23 @@ TreeErr_t InsertNode ( TreeNode_t** node, Val_t* value, Node_t node_t, TreeNode_
 
 /*=====================================================================================*/
 
-// TreeErr_t InsertNodeAfter ( TreeNode_t* node, TreeElem_t elem, int child ) {
+TreeNode_t* CopyTree ( TreeNode_t* node, TreeNode_t* prev_node ) {
 
-//     assert(node);
-//     _OK_STAT_
+    TreeNode_t* new_node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!new_node) return new_node;
 
-//     if ( 
-//         node->left && child == _left_ &&
-//         node->right && child == _right_
-//     )
-//         return TreeErr_t::INSERT_EX_POS_ERR;
+    new_node->data.num = node->data.num;
+    new_node->data.oper = node->data.oper;
+    new_node->data.var_idx = node->data.var_idx;
+    new_node->parent = prev_node;
+    new_node->type = node->type;
 
-//     if ( child == _left_ ) {
-//         status = InsertNode( &node->left, elem, node );
-//         TREE_STAT_CHECK_
-//     } else {
-//         status = InsertNode( &node->right, elem, node );
-//         TREE_STAT_CHECK_
-//     }     
-    
-//     _RET_OK_
+    if(new_node->left)
+        new_node->left = CopyTree (node->left, new_node);
+    if(new_node->right)
+        new_node->right = CopyTree (node->right, new_node);
 
-// }
+    return new_node;
+
+}
 

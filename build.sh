@@ -1,5 +1,6 @@
 echo "==============================BEGIN=COMPL=============================================="
-g++ -c src/main.cpp src/tree.cpp src/tree_dump.cpp src/diff_sup_func.cpp\
+g++ -c src/main.cpp src/tree.cpp src/tree_dump.cpp src/diff_sup_func.cpp src/save_load_func.cpp\
+    src/dump_tex.cpp src/diff_func.cpp\
     utils/sup_func.cpp\
     -I src -I stk_lib -I utils\
     -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
