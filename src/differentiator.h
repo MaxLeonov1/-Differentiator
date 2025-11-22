@@ -11,13 +11,6 @@ typedef struct TreeNode TreeNode_t;
 
 typedef enum {
 
-    DIFF_OK = 0,
-    DIFF_MEM_ALLOC_ERR = 2,
-
-} DiffErr_t;
-
-typedef enum {
-
     ADD  = 0,
     MULT = 1,
     SUB  = 2,
@@ -109,5 +102,8 @@ void      HashAndCopyInstr ( OperInstr_t* Instr_Def, Diff_t* diff );
 int       compare          ( const void* cmd_1, const void* cmd_2 );
 DiffErr_t DiffCtor         ( Diff_t* diff );
 void      DiffDtor         ( Diff_t* diff );
-TreeErr_t AddToNameTable   ( Diff_t* diff, const char* name );
+DiffErr_t AddToNameTable   ( Diff_t* diff, const char* name );
 
+TreeNode_t* CreateNumNode (double val,  TreeNode_t* prev_node);
+TreeNode_t* CreateBinOp   (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node);
+TreeNode_t* CreateUnOp    (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node);

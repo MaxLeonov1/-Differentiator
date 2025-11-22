@@ -1,7 +1,8 @@
 #include "tree.h"
 #include "differentiator.h"
-#include "dump_tex.h"
+#include "../log_utils/logger.h"
 #include "diff_func.h"
+#include "eq_simpl.h"
 
 
 
@@ -27,10 +28,11 @@ int main() {
 
     FindValue(&diff_1, 0);
     FindValue(&diff_1, 1);
+    SimplTree(&diff_1, 1);
 
-    TreeDump(&diff_1, 0, TreeErr_t::TREE_OK, nullptr);
-    TreeDump(&diff_1, 1, TreeErr_t::TREE_OK, nullptr);
-    CreateTexLog(&diff_1, 1, "tex_log.tex");
+    TreeDump(&diff_1, 0, DiffErr_t::TREE_OK, nullptr);
+    TreeDump(&diff_1, 1, DiffErr_t::TREE_OK, nullptr);
+    CreateTexLog(&diff_1, 1);
 
     SaveToDisk(&diff_1, 0, "test_disk.bin");
 

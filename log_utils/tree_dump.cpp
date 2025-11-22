@@ -1,14 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <assert.h>
 #include <stdarg.h>
 
-#include "tree.h"
-#include "differentiator.h"
-#include "sup_func.h"
+#include "logger.h"
+#include "tree_dump.h"
 
 #pragma GCC diagnostic ignored "-Wformat=2"
 #pragma GCC diagnostic ignored "-Wformat-overflow"
@@ -22,22 +18,22 @@
 
 /*=====================================================================================*/
 
-const char* StatusCodeToStr ( TreeErr_t status ) {
+const char* StatusCodeToStr ( DiffErr_t status ) {
 
     switch(status) {
-        case TreeErr_t::INSERT_EX_POS_ERR:
+        case DiffErr_t::INSERT_EX_POS_ERR:
             return "TRY TO INSERT IN EXISTING TREE NODE";
-        case TreeErr_t::FILE_OPEN_ERR:
+        case DiffErr_t::FILE_OPEN_ERR:
             return "UNABLE TO OPEN FILE";
-        case TreeErr_t::MEM_ALLOC_ERR:
+        case DiffErr_t::MEM_ALLOC_ERR:
             return "ERROR IN ALLOCATION";
-        case TreeErr_t::READ_SYNTAX_ERR:
+        case DiffErr_t::READ_SYNTAX_ERR:
             return "INCORRECT FILE SYNTAX";
-        case TreeErr_t::READ_DATA_ERR:
+        case DiffErr_t::READ_DATA_ERR:
             return "ERROR WHILE READING NODE DATA";
-        case TreeErr_t::EMPTY_TREE_ACT_ERR:
+        case DiffErr_t::EMPTY_TREE_ACT_ERR:
             return "OPERATION WITH EMPTY TREE";
-        case TreeErr_t::TREE_OK:
+        case DiffErr_t::TREE_OK:
             return "OK";
     }
 
@@ -45,59 +41,27 @@ const char* StatusCodeToStr ( TreeErr_t status ) {
 
 /*=====================================================================================*/
 
-void CreateLogDir ( char* dir_name ) {
-
-    assert(dir_name);
- 
-    char proj_path[MAX_STR_LEN_] = "";
-    time_t log_time_sec = time(NULL);
-    struct tm* log_time = localtime( &log_time_sec );
-    
-    getcwd(proj_path, sizeof(proj_path));
-    sprintf ( proj_path, "%s%clogs", proj_path, PATH_SEP );
-    _MKDIR(proj_path);
-
-    sprintf ( dir_name,
-              "%s%clog_%d.%d.%d_%d-%d-%d",
-              proj_path,
-              PATH_SEP,
-              log_time->tm_mday,
-              log_time->tm_mon,
-              1900 + log_time->tm_year,
-              log_time->tm_hour,
-              log_time->tm_min,
-              log_time->tm_sec );
-    _MKDIR(dir_name);
-
-}
-
-/*=====================================================================================*/
-
-void TreeDump ( Diff_t* diff, int tree_idx, TreeErr_t status, const char* format, ... ) {
-
+void TreeDump(Diff_t* diff, int tree_idx, DiffErr_t status, const char* format, ...) {
     assert(diff);
 
     static int call_num = 1;
     char filename[MAX_STR_LEN_] = "";
     char graphname[MAX_STR_LEN_] = "";
-    static char log_dir[MAX_STR_LEN_] = "";
+    const char* log_dir = GetGlobalLogDir();
 
-    if (call_num == 1) CreateLogDir ( log_dir );
-
-    snprintf ( filename, sizeof(filename), "%s%clist_log.htm", log_dir, PATH_SEP );
-    snprintf ( graphname, sizeof(graphname), "graph_%d.svg", call_num );
-
+    snprintf(filename, sizeof(filename), "%s%cgraph_log.html", log_dir, PATH_SEP);
+    snprintf(graphname, sizeof(graphname), "graph_%d.svg", call_num);
     call_num++;
 
-    FILE* log_file = fopen ( filename, "a" );
-    if ( log_file == nullptr ) exit(0);
+    FILE* log_file = fopen(filename, "a");
+    if (log_file == nullptr) exit(0);
 
-    fprintf ( log_file,
-              "\n<div style=\"height:4px;background:#000\"/>\n" 
-              "<pre>\n"
-              "<body style=\"background-color: white;\">\n" );
+    fprintf(log_file,
+            "\n<div style=\"height:4px;background:#000\"/>\n" 
+            "<pre>\n"
+            "<body style=\"background-color: white;\">\n");
 
-     if (format != NULL) {
+    if (format != NULL) {
         va_list args;
         va_start(args, format);
 
@@ -108,34 +72,30 @@ void TreeDump ( Diff_t* diff, int tree_idx, TreeErr_t status, const char* format
         va_end(args);
     }
 
-    PrintLogHeader ( diff->forest[tree_idx], log_file, status );
+    PrintLogHeader(diff->forest[tree_idx], log_file, status);
     
-    fprintf ( log_file, "<h3>[IMG]:</h3>\n" );
+    fprintf(log_file, "<h3>[IMG]:</h3>\n");
 
     if (diff->forest[tree_idx]->root) {
-
-        CreateGraphImg ( diff, tree_idx, graphname, log_dir );
-        fprintf ( 
-            log_file, 
-            "<img "
-            "src = \"%s\" "
-            "style=\"width: 80vw; height: auto; max-width: 100%%;\" >",
-            graphname 
-        );
+        CreateGraphImg(diff, tree_idx, graphname, log_dir);
+        fprintf(log_file, 
+                "<img "
+                "src = \"%s\" "
+                "style=\"width: 80vw; height: auto; max-width: 100%%;\" >",
+                graphname);
     }
 
-    fclose ( log_file );
-
+    fclose(log_file);
 }
 
 /*=====================================================================================*/
 
-void PrintLogHeader ( Tree_t* tree, FILE* log_file, TreeErr_t status ) {
+void PrintLogHeader ( Tree_t* tree, FILE* log_file, DiffErr_t status ) {
 
     assert(tree);
     assert(log_file);
 
-    if ( status != TreeErr_t::TREE_OK )
+    if ( status != DiffErr_t::TREE_OK )
         fprintf(
             log_file,
             "<h3 style=\"color:red;\">[ERROR][%d]</h3>\n"

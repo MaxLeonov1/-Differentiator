@@ -84,9 +84,9 @@ DiffErr_t DiffCtor ( Diff_t* diff ) {
 
     if (!diff->def_op_instr ||
         !diff->sort_op_instr)
-        return DiffErr_t::DIFF_MEM_ALLOC_ERR;
+        return DiffErr_t::MEM_ALLOC_ERR;
 
-    return DiffErr_t::DIFF_OK;
+    _RET_OK_
     
 }
 
@@ -113,7 +113,7 @@ void DiffDtor ( Diff_t* diff ) {
 
 /*=====================================================================================*/
 
-TreeErr_t AddToNameTable ( Diff_t* diff, const char* name ) {
+DiffErr_t AddToNameTable ( Diff_t* diff, const char* name ) {
 
     assert(diff);
 
@@ -122,11 +122,59 @@ TreeErr_t AddToNameTable ( Diff_t* diff, const char* name ) {
         diff->name_table.size = (diff->name_table.size + 1)*2;
         diff->name_table.buff = (Var_t*)realloc(diff->name_table.buff, sizeof(diff->name_table.buff[0])*diff->name_table.size);
         if (!diff->name_table.buff)
-            return TreeErr_t::MEM_ALLOC_ERR;
+            return DiffErr_t::MEM_ALLOC_ERR;
     }
 
     diff->name_table.buff[diff->name_table.num].name = my_strdup(name);
     diff->name_table.num++;
 
     _RET_OK_
+}
+
+/*=====================================================================================*/
+
+TreeNode_t* CreateNumNode (double val, TreeNode_t* prev_node) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.num = val;
+    node->parent = prev_node;
+    node->left = nullptr;
+    node->right = nullptr;
+    node->type = Node_t::NUM;
+
+    return node;
+}
+
+/*=====================================================================================*/
+
+TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.oper = oper;
+    node->parent = prev_node;
+    node->left = left;
+    node->right = right;
+    node->type = Node_t::OP_BIN;
+
+    return node;
+}
+ 
+/*=====================================================================================*/
+
+TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.oper = oper;
+    node->parent = prev_node;
+    node->left = left;
+    node->right = nullptr;
+    node->type = Node_t::OP_UN;
+
+    return node;
 }

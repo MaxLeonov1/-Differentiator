@@ -23,11 +23,11 @@ void TreeCtor ( Tree_t* tree ) {
 
 /*=====================================================================================*/
 
-TreeErr_t TreeDtor ( Tree_t* tree ) {
+DiffErr_t TreeDtor ( Tree_t* tree ) {
 
     assert(tree);
 
-    if (!tree->root) return TreeErr_t::EMPTY_TREE_ACT_ERR;
+    if (!tree->root) return DiffErr_t::EMPTY_TREE_ACT_ERR;
     DeleteNode(tree->root);
     free(tree->buffer);
 
@@ -37,12 +37,12 @@ TreeErr_t TreeDtor ( Tree_t* tree ) {
 
 /*=====================================================================================*/
 
-TreeErr_t AllocNode ( TreeNode_t** node, Node_t node_t ) {
+DiffErr_t AllocNode ( TreeNode_t** node, Node_t node_t ) {
 
     assert(node);
 
     TreeNode_t* node_ptr = (TreeNode_t*)calloc(1, sizeof(node_ptr[0]));
-    if ( !node_ptr ) return TreeErr_t::MEM_ALLOC_ERR;
+    if ( !node_ptr ) return DiffErr_t::MEM_ALLOC_ERR;
 
     node_ptr->data.num = 0;
     node_ptr->type = node_t;
@@ -58,7 +58,7 @@ TreeErr_t AllocNode ( TreeNode_t** node, Node_t node_t ) {
 
 /*=====================================================================================*/
 
-TreeErr_t DeleteNode ( TreeNode* node ) {
+DiffErr_t DeleteNode ( TreeNode* node ) {
 
     assert(node != nullptr);
 
@@ -75,7 +75,7 @@ TreeErr_t DeleteNode ( TreeNode* node ) {
 
 /*=====================================================================================*/
 
-TreeErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t* prev_node ) {
+DiffErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t* prev_node ) {
 
     assert(node);
     _OK_STAT_

@@ -10,4 +10,4 @@ typedef enum{
     READ_DATA_ERR = 5,
     EMPTY_TREE_ACT_ERR = 6,
 
-} TreeErr_t;
+} DiffErr_t;

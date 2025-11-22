@@ -33,55 +33,7 @@
 
 
 
-TreeNode_t* CreateNumNode (double val, TreeNode_t* prev_node) {
-
-    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!node) return node;
-
-    node->data.num = val;
-    nP_ = prev_node;
-    nL_ = nullptr;
-    nR_ = nullptr;
-    nT_ = Node_t::NUM;
-
-    return node;
-}
-
-
-
-TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node) {
-
-    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!node) return node;
-
-    node->data.oper = oper;
-    nP_ = prev_node;
-    nL_ = left;
-    nR_ = right;
-    nT_ = Node_t::OP_BIN;
-
-    return node;
-}
- 
-
-
-TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node) {
-
-    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!node) return node;
-
-    node->data.oper = oper;
-    nP_ = prev_node;
-    nL_ = left;
-    nR_ = nullptr;
-    nT_ = Node_t::OP_UN;
-
-    return node;
-}
-
-
-
-TreeErr_t FindDerivative ( Tree_t* tree, Tree_t* new_tree, size_t dir_var ) {
+DiffErr_t FindDerivative ( Tree_t* tree, Tree_t* new_tree, size_t dir_var ) {
 
     assert(tree);
     assert(new_tree);
@@ -193,7 +145,7 @@ TreeNode_t* Differentiate ( TreeNode_t* node, TreeNode_t* prev_node, size_t dir_
 
 
 
-TreeErr_t FindValue (Diff_t* diff, int tree_idx) {
+DiffErr_t FindValue (Diff_t* diff, int tree_idx) {
 
     assert(diff);
     assert(diff->forest[tree_idx]);

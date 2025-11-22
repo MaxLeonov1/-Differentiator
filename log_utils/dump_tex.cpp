@@ -2,10 +2,15 @@
 #include <stdlib.h>
 
 #include "dump_tex.h"
+#include "logger.h"
 
 
+void CreateTexLog (Diff_t* diff, int tree_idx ) {
 
-void CreateTexLog (Diff_t* diff, int tree_idx, const char* filename) {
+    char filename[MAX_STR_LEN_] = "";
+    const char* log_dir = GetGlobalLogDir();
+
+    sprintf(filename, "%s%ctex_log.tex", log_dir, PATH_SEP);
 
     FILE* file = fopen ( filename, "wb" );
     if ( file == nullptr ) exit(0);
