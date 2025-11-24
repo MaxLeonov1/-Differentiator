@@ -5,6 +5,7 @@
 
 #include "logger.h"
 #include "tree_dump.h"
+#include "errors.h"
 
 #pragma GCC diagnostic ignored "-Wformat=2"
 #pragma GCC diagnostic ignored "-Wformat-overflow"
@@ -15,29 +16,6 @@
 #define NUM_COL_ "fillcolor=\"#4CAF50\", color=\"#2E7D32\""
 #define VAR_COL_ "fillcolor=\"#FF9800\", color=\"#EF6C00\""
 #define OP_COL_  "fillcolor=\"#2196F3\", color=\"#1565C0\""
-
-/*=====================================================================================*/
-
-const char* StatusCodeToStr ( DiffErr_t status ) {
-
-    switch(status) {
-        case DiffErr_t::INSERT_EX_POS_ERR:
-            return "TRY TO INSERT IN EXISTING TREE NODE";
-        case DiffErr_t::FILE_OPEN_ERR:
-            return "UNABLE TO OPEN FILE";
-        case DiffErr_t::MEM_ALLOC_ERR:
-            return "ERROR IN ALLOCATION";
-        case DiffErr_t::READ_SYNTAX_ERR:
-            return "INCORRECT FILE SYNTAX";
-        case DiffErr_t::READ_DATA_ERR:
-            return "ERROR WHILE READING NODE DATA";
-        case DiffErr_t::EMPTY_TREE_ACT_ERR:
-            return "OPERATION WITH EMPTY TREE";
-        case DiffErr_t::TREE_OK:
-            return "OK";
-    }
-
-}
 
 /*=====================================================================================*/
 
@@ -111,12 +89,10 @@ void PrintLogHeader ( Tree_t* tree, FILE* log_file, DiffErr_t status ) {
     fprintf( 
         log_file,
         "<h3>[TREE INFO]:</h3>\n"
-        "name: %s\n"
         "location: %s::%d, %s()\n"
         "<h3>[TREE DATA]:</h3>\n"
         "capacity: %lu\n"
         "root[%lu]\n",
-        tree->info.name,
         tree->info.file,
         tree->info.line,
         tree->info.func,
@@ -193,19 +169,9 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text, Diff_t* diff) 
             );
             break;
 
-        case Node_t::OP_BIN:
-            type = "OPER_BIN";
-            color = OP_COL_;
-            sprintf(
-                data, 
-                "[%s(%s)]", 
-                diff->def_op_instr[node->data.oper].f_name, 
-                diff->def_op_instr[node->data.oper].name
-            );
-            break;
-
         case Node_t::OP_UN:
-            type = "OPER_UN";
+        case Node_t::OP_BIN:
+            type = "OPER";
             color = OP_COL_;
             sprintf(
                 data, 
@@ -220,7 +186,7 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text, Diff_t* diff) 
             color = VAR_COL_;
             sprintf(
                 data,
-                "[ %d '%s')]",
+                "[ %d '%c')]",
                 node->data.var_idx,
                 diff->name_table.buff[node->data.var_idx].name
             );

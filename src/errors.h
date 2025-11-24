@@ -11,3 +11,5 @@ typedef enum{
     EMPTY_TREE_ACT_ERR = 6,
 
 } DiffErr_t;
+
+const char* StatusCodeToStr ( DiffErr_t status );

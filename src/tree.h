@@ -46,10 +46,9 @@ struct TreeNode {
 
 struct TreeDebugInfo {
 
-    const char* name;
     const char* func;
     const char* file;
-    const int line;
+    int line;
 
 };
 
@@ -62,7 +61,6 @@ struct Tree {
     TreeNode_t* root;
 
     size_t cpcty; 
-    char* buffer; 
 
 };
 
@@ -75,12 +73,12 @@ DiffErr_t   DeleteNode        ( TreeNode* node );
 DiffErr_t   InsertNode        ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t* prev_node );
 TreeNode_t* CopyTree          ( TreeNode_t* node, TreeNode_t* prev_node );
 DiffErr_t   CreateNodeFromStr ( const char* str, Diff_t* diff, TreeNode_t** new_node );
+int         AddEquation       (Diff_t* diff, DiffErr_t* status);
 
 DiffErr_t   SaveToDisk   ( Diff_t* diff, int tree_idx, const char* disk_name );
 void        WriteToDisk  ( TreeNode_t* node, Var_t* name_table, FILE* disk );
 DiffErr_t   ReadFromDisk ( Diff_t* diff, const char* filename );
 TreeNode_t* ReadNode     ( char* buffer, size_t* pos, DiffErr_t* status, Diff_t* diff );
-char*       ReadData     ( char* ptr, size_t* len );
 
 /*=====================================================================================*/
 
@@ -103,8 +101,10 @@ char*       ReadData     ( char* ptr, size_t* len );
 
 #ifndef _DEBUG
     #define TREE_INIT(name) Tree_t name = { nullptr, 0 };
+    #define TREE_INIT_LIST(name) { nullptr, 0 }
 #else
-    #define TREE_INIT(name) Tree_t name = { {#name, __FUNCTION__, __FILE__, __LINE__}, nullptr, 0 };
+    #define TREE_INIT(name) Tree_t name = { {#name, __FUNCTION__, __FILE__, __LINE__}, nullptr, 0};
+    #define TREE_INIT_LIST(name) { {#name, __FUNCTION__, __FILE__, __LINE__}, nullptr, 0}
 #endif
 
 #define _OK_STAT_ DiffErr_t status = DiffErr_t::TREE_OK;

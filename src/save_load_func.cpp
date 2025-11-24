@@ -34,34 +34,31 @@ DiffErr_t SaveToDisk ( Diff_t* diff, int tree_idx, const char* disk_name ) {
 void WriteToDisk ( TreeNode_t* node, Var_t* name_table, FILE* disk ) {
 
     assert(node);
+    assert(name_table);
     assert(disk);
 
-    char data[MAX_STR_LEN_] = "";
-
-    switch(node->type) {
-        case Node_t::NUM:
-            fprintf(disk, "( %.2lf ", node->data.num);
-            break;
-        case Node_t::OP_BIN:
-            fprintf(disk, "( %s ", OperInstructions[node->data.oper].name);
-            break;
-        case Node_t::OP_UN:
-            fprintf(disk, "( %s ", OperInstructions[node->data.oper].name);
-            break;
-        case Node_t::VAR:
-            fprintf(disk, "( %s ", name_table[node->data.var_idx].name);
-            break;
-    }
+    fprintf(disk, "(");
 
     if (node->left)
         WriteToDisk(node->left, name_table, disk);
-    else 
-        fprintf(disk, " nil"); 
+
+    switch(node->type) {
+        case Node_t::NUM:
+            fprintf(disk, " %.2lf ", node->data.num);
+            break;
+        case Node_t::OP_BIN:
+            fprintf(disk, " %s ", OperInstructions[node->data.oper].name);
+            break;
+        case Node_t::OP_UN:
+            fprintf(disk, " %s ", OperInstructions[node->data.oper].name);
+            break;
+        case Node_t::VAR:
+            fprintf(disk, " %c ", name_table[node->data.var_idx].name);
+            break;
+    }
     
     if (node->right)
         WriteToDisk(node->right, name_table, disk);
-    else 
-        fprintf(disk, " nil");
         
     fprintf(disk, ")");
 
@@ -80,89 +77,112 @@ DiffErr_t ReadFromDisk (Diff_t* diff, const char* filename ) {
     if (!file) return DiffErr_t::FILE_OPEN_ERR;
     long long byte_num = FileByteCount(filename);
 
-    diff->forest[0]->buffer = (char*)calloc((size_t)byte_num + _buff_byte_padding_, sizeof(diff->forest[0]->buffer[0]));
-    if (!diff->forest[0]->buffer) return DiffErr_t::MEM_ALLOC_ERR;
-    fread(diff->forest[0]->buffer, sizeof(diff->forest[0]->buffer[0]), (size_t)byte_num + _buff_byte_padding_, file);
+    char* buffer = (char*)calloc((size_t)byte_num + _buff_byte_padding_, sizeof(char));
+    if (!buffer) return DiffErr_t::MEM_ALLOC_ERR;
+    fread(buffer, sizeof(buffer[0]), (size_t)byte_num + _buff_byte_padding_, file);
 
     size_t pos = 0;
 
-    diff->forest[0]->root = ReadNode(diff->forest[0]->buffer, &pos, &status, diff);
+    diff->forest[0]->root = ReadNode(buffer, &pos, &status, diff);
+    if (!diff->forest[0]->root) return status;
 
     if (status == DiffErr_t::READ_SYNTAX_ERR ) {
         //printf("%d %s\n", pos, tree->buffer);
-        TreeDump(diff, 0, status, &diff->forest[0]->buffer[pos]);
+        TreeDump(diff, 0, status, &buffer[pos]);
+        free(buffer);
         return status; 
 
-    } else if (status != DiffErr_t::TREE_OK )
+    } else if (status != DiffErr_t::TREE_OK ) {
+        free(buffer);
         return status;
+    }
 
+    free(buffer);
     _RET_OK_
 
 }
 
 /*=====================================================================================*/
 
-TreeNode_t* ReadNode ( char* buffer, size_t* pos, DiffErr_t* status, Diff_t* diff ) {
-
+TreeNode_t* ReadNode(char* buffer, size_t* pos, DiffErr_t* status, Diff_t* diff) {
     if (*status != DiffErr_t::TREE_OK) return nullptr;
 
-    if ( buffer[*pos] == '(' ) {
-        (*pos)++;
-        SKIP_SPACE_
+    SKIP_SPACE_
 
-        // (*cpcty)++;
-        // (*pos)++;
-
-        size_t len = 0;
-
-        SKIP_SPACE_
-        char* temp_data = ReadData(&buffer[*pos], &len);
-        if (!temp_data) {
-            *status = DiffErr_t::READ_DATA_ERR;
-            return nullptr;
-        }
-        (*pos) += len;
-
-        TreeNode_t* node = nullptr;
-        *status = CreateNodeFromStr(temp_data, diff, &node);
-        if (*status != DiffErr_t::TREE_OK)
-            return nullptr;
-
-        diff->forest[0]->cpcty++;
-
-        //printf("%s\n", &buffer[*pos]);
-        SKIP_SPACE_
-        node->left = ReadNode( buffer, pos, status, diff);
-        SKIP_SPACE_
-        node->right = ReadNode( buffer, pos, status, diff);
-        SKIP_SPACE_
-        (*pos)++;
-        //printf(" %s\n", &buffer[*pos]);
-
-        if (node->left && node->right) {
-            node->left->parent = node;
-            node->right->parent = node;
-        }
-        SKIP_SPACE_
-        return node; 
-
-    } else if (strncmp(&buffer[*pos], "nil", 3) == 0) {
-
-        SKIP_SPACE_
-        (*pos)+=3;
-        SKIP_SPACE_
-        *status = DiffErr_t::TREE_OK;
-        SKIP_SPACE_
-        return nullptr;
-
-    } else {
-
-        //printf("%c\n", buffer[*pos]);
+    if (buffer[*pos] != '(') {
         *status = DiffErr_t::READ_SYNTAX_ERR;
         return nullptr;
+    }
+    (*pos)++;
+    SKIP_SPACE_
 
+    TreeNode_t* left = nullptr;
+    if (buffer[*pos] == '(') {
+        left = ReadNode(buffer, pos, status, diff);
+        if (*status != DiffErr_t::TREE_OK) return nullptr;
+    }
+    SKIP_SPACE_
+
+    char temp_data[MAX_STR_LEN_] = "";
+    size_t len = 0;
+    
+    while (buffer[*pos] != ' ' && buffer[*pos] != ')' && buffer[*pos] != '\0' ) {
+        temp_data[len++] = buffer[*pos];
+        (*pos)++;
+    }
+    temp_data[len] = '\0';
+    
+    if (len == 0) {
+        *status = DiffErr_t::READ_DATA_ERR;
+        return nullptr;
     }
 
+    SKIP_SPACE_
+
+    TreeNode_t* right = nullptr;
+    if (buffer[*pos] == '(') {
+        right = ReadNode(buffer, pos, status, diff);
+        if (*status != DiffErr_t::TREE_OK) return nullptr;
+    }
+    SKIP_SPACE_
+
+    (*pos)++; //for ")"
+    SKIP_SPACE_
+
+    TreeNode_t* node = nullptr;
+    *status = CreateNodeFromStr(temp_data, diff, &node);
+    if (*status != DiffErr_t::TREE_OK) return nullptr;
+
+    diff->forest[0]->cpcty++;
+
+    if (node->type == Node_t::OP_BIN) {
+        node->left = left;
+        node->right = right;
+        
+        if (left) left->parent = node;
+        if (right) right->parent = node;
+    }
+    else if (node->type == Node_t::OP_UN) {
+        node->left = nullptr;
+        node->right = right;
+        
+        if (right) right->parent = node;
+        
+        if (left != nullptr) {
+            *status = DiffErr_t::READ_SYNTAX_ERR;
+            DeleteNode(node);
+            return nullptr;
+        }
+    }
+    else if (node->type == Node_t::NUM || node->type == Node_t::VAR) {
+        if (left != nullptr || right != nullptr) {
+            *status = DiffErr_t::READ_SYNTAX_ERR;
+            DeleteNode(node);
+            return nullptr;
+        }
+    }
+
+    return node;
 }
 
 /*=====================================================================================*/
@@ -203,15 +223,23 @@ DiffErr_t CreateNodeFromStr ( const char* str, Diff_t* diff, TreeNode_t** new_no
     }
 
     if (strlen(str) == 1 && isalpha(str[0])) {
+
+        int var_idx = -1;
+        for (size_t i = 0; i < diff->name_table.num; i++) {
+            if (diff->name_table.buff[i].name == str[0]) {
+                var_idx = (int)i;
+                break;
+            }
+        }
         
-        status = AddToNameTable(diff, str);
+        if (var_idx == -1)
+            status = AddToNameTable(diff, str[0]);
         TREE_STAT_CHECK_
         
         TreeNode_t* node = nullptr;
-        status = AllocNode(&node, Node_t::NUM);
+        status = AllocNode(&node, Node_t::VAR);
         TREE_STAT_CHECK_
         
-        node->type = Node_t::VAR;
         node->data.var_idx = diff->name_table.num - 1;
         *new_node = node;
         _RET_OK_
@@ -222,12 +250,3 @@ DiffErr_t CreateNodeFromStr ( const char* str, Diff_t* diff, TreeNode_t** new_no
 }
 
 /*=====================================================================================*/
-
-char* ReadData ( char* ptr, size_t* len ) {
-
-    //printf("%s\n", ptr);
-    sscanf( ptr, "\"%*[^\"]\"%n", len );
-    *(ptr + *len - 1) = '\0';
-    return ptr+1;
-
-}

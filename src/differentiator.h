@@ -7,6 +7,8 @@
 typedef struct Tree Tree_t;
 typedef struct TreeNode TreeNode_t;
 
+#define MAX_EQ_NUM_ 10
+
 /*=====================================================================================*/
 
 typedef enum {
@@ -55,7 +57,7 @@ static OperInstr_t OperInstructions[] = {
 typedef struct {
 
     double val;
-    char*  name;
+    char   name;
 
 } Var_t;
 
@@ -71,6 +73,7 @@ typedef struct {
 
     int op_num;
 
+    int max_eq_num;
     int tree_num;
     Tree_t** forest;
 
@@ -83,6 +86,7 @@ typedef struct {
 
 #define DIFF_INIT(name) Diff_t name = { \
     .op_num = 0,                        \
+    .max_eq_num = 0,                    \
     .tree_num = 0,                      \
     .forest = nullptr,                  \
     .def_op_instr = nullptr,            \
@@ -102,7 +106,7 @@ void      HashAndCopyInstr ( OperInstr_t* Instr_Def, Diff_t* diff );
 int       compare          ( const void* cmd_1, const void* cmd_2 );
 DiffErr_t DiffCtor         ( Diff_t* diff );
 void      DiffDtor         ( Diff_t* diff );
-DiffErr_t AddToNameTable   ( Diff_t* diff, const char* name );
+DiffErr_t AddToNameTable   ( Diff_t* diff, char name );
 
 TreeNode_t* CreateNumNode (double val,  TreeNode_t* prev_node);
 TreeNode_t* CreateBinOp   (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node);

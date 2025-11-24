@@ -3,39 +3,32 @@
 #include "../log_utils/logger.h"
 #include "diff_func.h"
 #include "eq_simpl.h"
-
-
+#include "menu.h"
 
 int main() {
 
+    _OK_STAT_
     DIFF_INIT(diff_1)
-    TREE_INIT(tree_1)
-    TREE_INIT(tree_2)
-
-    TreeCtor(&tree_1);
-    TreeCtor(&tree_2);
+    
     DiffCtor(&diff_1);
+    
+    AddEquation(&diff_1, &status);
+    AddEquation(&diff_1, &status);
+    
 
-    diff_1.forest[0] = &tree_1;
-    diff_1.forest[1] = &tree_2;
-
-    ReadFromDisk(&diff_1, "disk.bin");
-
-    //diff_1.forest[1]->root = CopyTree(diff_1.forest[0]->root, nullptr);
-
-    FindDerivative(&tree_1, &tree_2, 0);
-    diff_1.tree_num = 2;
-
-    FindValue(&diff_1, 0);
-    FindValue(&diff_1, 1);
-    SimplTree(&diff_1, 1);
-
-    TreeDump(&diff_1, 0, DiffErr_t::TREE_OK, nullptr);
-    TreeDump(&diff_1, 1, DiffErr_t::TREE_OK, nullptr);
-    CreateTexLog(&diff_1, 1);
-
-    SaveToDisk(&diff_1, 0, "test_disk.bin");
-
+    MenuOption choice = MenuOption::DIFFERENTIATE;
+    do {
+        ShowMainMenu();
+        choice = GetMenuChoice();
+        HandleMenuChoice(&diff_1, choice, &status);
+            
+        if (status != DiffErr_t::TREE_OK) {
+            printf("[ERROR: %d][%s]\n", status, StatusCodeToStr(status));
+        }
+            
+    } while (choice != MenuOption::EXIT);
+    
+    
     DiffDtor(&diff_1);
-
+    return 0;
 }

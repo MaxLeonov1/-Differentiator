@@ -15,7 +15,7 @@
 void TreeCtor ( Tree_t* tree ) {
 
     assert(tree);
-
+    
     tree->root = nullptr;
     tree->cpcty = 1;
 
@@ -29,7 +29,6 @@ DiffErr_t TreeDtor ( Tree_t* tree ) {
 
     if (!tree->root) return DiffErr_t::EMPTY_TREE_ACT_ERR;
     DeleteNode(tree->root);
-    free(tree->buffer);
 
     _RET_OK_
 
@@ -129,3 +128,39 @@ TreeNode_t* CopyTree ( TreeNode_t* node, TreeNode_t* prev_node ) {
 
 }
 
+/*=====================================================================================*/
+
+int AddEquation (Diff_t* diff, DiffErr_t* status) {
+
+    Tree_t* eq = (Tree_t*)calloc(1, sizeof(Tree_t));
+    if (!eq) {
+        *status = DiffErr_t::MEM_ALLOC_ERR;
+        return -1;
+    }
+
+    (*eq).cpcty = 0;
+    _IF_DEBUG(
+    (*eq).info.file = __FILE__;
+    (*eq).info.func = __FUNCTION__;
+    (*eq).info.line = __LINE__;
+    )
+    (*eq).root = nullptr;
+
+    TreeCtor(eq);
+
+    if (diff->max_eq_num <= diff->tree_num - 1) {
+
+        diff->max_eq_num = diff->max_eq_num*2;
+        diff->forest = (Tree_t**)realloc(diff->forest, diff->max_eq_num*sizeof(diff->forest[0]));
+        if (!diff->forest) {
+            *status = DiffErr_t::MEM_ALLOC_ERR;
+            return -1;
+        }
+    }
+
+    diff->forest[diff->tree_num] = eq;
+
+    diff->tree_num++;
+
+    return diff->tree_num - 1;
+}

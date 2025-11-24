@@ -4,7 +4,7 @@
 
 
 
-TreeNode_t* SimplConstTree ( TreeNode_t* node);
-double      EvalConstTree  ( TreeNode_t* node);
-int         ConstTreeCheck ( TreeNode_t* node);
-DiffErr_t   SimplTree(Diff_t* diff, int tree_idx);
+TreeNode_t* SimplConstTree   ( TreeNode_t* node);
+int         TryEvalConstTree ( TreeNode_t* node, double* result);
+TreeNode_t* SimplTrivleCases ( TreeNode_t* node);
+DiffErr_t   SimplTree        ( Diff_t* diff, int tree_idx);

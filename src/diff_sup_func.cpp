@@ -74,7 +74,8 @@ DiffErr_t DiffCtor ( Diff_t* diff ) {
     diff->op_num = sizeof(OperInstructions)/sizeof(OperInstructions[0]);
 
 
-    diff->forest = (Tree_t**)calloc(10, sizeof(Tree_t*));
+    diff->max_eq_num = MAX_EQ_NUM_;
+    diff->forest = (Tree_t**)calloc(diff->max_eq_num, sizeof(Tree_t*));
 
     diff->def_op_instr = (OperInstr_t*)calloc(diff->op_num, sizeof(OperInstr_t));
     diff->sort_op_instr = (OperInstr_t*)calloc(diff->op_num, sizeof(OperInstr_t));
@@ -97,23 +98,20 @@ void DiffDtor ( Diff_t* diff ) {
     free(diff->def_op_instr);
     free(diff->sort_op_instr);
 
-    for (size_t idx = 0; idx<diff->tree_num; idx++) {
+    for (size_t idx = 0; idx < diff->tree_num; idx++) {
         TreeDtor(diff->forest[idx]);
+        free(diff->forest[idx]);
     }
     free(diff->forest);
 
-    if (diff->name_table.buff) {
-        for (size_t idx = 0; idx<diff->name_table.num; idx++) {
-            free(diff->name_table.buff[idx].name);
-        }
+    if (diff->name_table.buff)
         free(diff->name_table.buff);
-    }
 
 }
 
 /*=====================================================================================*/
 
-DiffErr_t AddToNameTable ( Diff_t* diff, const char* name ) {
+DiffErr_t AddToNameTable ( Diff_t* diff, char name ) {
 
     assert(diff);
 
@@ -125,7 +123,7 @@ DiffErr_t AddToNameTable ( Diff_t* diff, const char* name ) {
             return DiffErr_t::MEM_ALLOC_ERR;
     }
 
-    diff->name_table.buff[diff->name_table.num].name = my_strdup(name);
+    diff->name_table.buff[diff->name_table.num].name = name;
     diff->name_table.num++;
 
     _RET_OK_
@@ -165,15 +163,15 @@ TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeN
  
 /*=====================================================================================*/
 
-TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node) {
+TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* right, TreeNode_t* prev_node) {
 
     TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
     if (!node) return node;
 
     node->data.oper = oper;
     node->parent = prev_node;
-    node->left = left;
-    node->right = nullptr;
+    node->left = nullptr;
+    node->right = right;
     node->type = Node_t::OP_UN;
 
     return node;

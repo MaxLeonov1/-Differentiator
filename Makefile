@@ -3,7 +3,7 @@ CXX := g++
 INCLUDES := -I src -I stk_lib -I utils -I log_utils
 
 SOURCES := src/main.cpp src/tree.cpp src/diff_sup_func.cpp src/save_load_func.cpp src/diff_func.cpp \
-           src/eq_simpl.cpp \
+           src/eq_simpl.cpp src/menu.cpp src/errors.cpp\
            log_utils/tree_dump.cpp log_utils/dump_tex.cpp log_utils/logger.cpp \
            utils/sup_func.cpp
 
@@ -50,11 +50,9 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 	chmod +x $(TARGET)
 
-clean:
+clean: logclean
 	rm -rf $(OBJ_DIR)
 
-logclean: clean
+logclean:
 	rm -rf logs
 	rm -f tex_log.tex
-
-.PHONY: all debug release clean logclean
