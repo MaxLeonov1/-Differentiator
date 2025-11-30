@@ -13,16 +13,29 @@ typedef struct TreeNode TreeNode_t;
 
 typedef enum {
 
-    ADD  = 0,
-    MULT = 1,
-    SUB  = 2,
-    DIV  = 3,
-    SIN  = 4,
-    COS  = 5,
-    TG   = 6,
-    CTG  = 7,
-    DEG  = 8,
-    LN   = 9,
+    ADD    = 0,
+    MULT   = 1,
+    SUB    = 2,
+    DIV    = 3,
+    SIN    = 4,
+    COS    = 5,
+    TG     = 6,
+    CTG    = 7,
+    DEG    = 8,
+    LN     = 9,
+    LOG    = 10,
+    ARCSIN = 11,
+    ARCCOS = 12,
+    ARCTG  = 13,
+    ARCCTG = 14,
+    SH     = 15,
+    CH     = 16,
+    TH     = 17,
+    CTH    = 18,
+    ARCSH  = 19,
+    ARCCH  = 20,
+    ARCTH  = 21,
+    ARCCTH = 22, 
 
 } Oper_t;
 
@@ -39,17 +52,29 @@ typedef struct {
 } OperInstr_t;
 
 static OperInstr_t OperInstructions[] = {
-    {Oper_t::ADD,  "ADD",  "+",   0, 0},
-    {Oper_t::MULT, "MULT", "*",   0, 0},
-    {Oper_t::SUB,  "SUB",  "-",   0, 0},
-    {Oper_t::DIV,  "DIV",  "/",   0, 0},
-    {Oper_t::SIN,  "SIN",  "sin", 0, 1},
-    {Oper_t::COS,  "COS",  "cos", 0, 1},
-    {Oper_t::TG,   "TG",   "tg",  0, 1},
-    {Oper_t::CTG,  "CTG",  "ctg", 0, 1},
-    {Oper_t::DEG,  "DEG",  "^",   0, 0},
-    {Oper_t::LN,   "LN",   "ln",  0, 1},
-
+    {Oper_t::ADD,    "ADD",    "+",      0, 0},
+    {Oper_t::MULT,   "MULT",   "*",      0, 0},
+    {Oper_t::SUB,    "SUB",    "-",      0, 0},
+    {Oper_t::DIV,    "DIV",    "/",      0, 0},
+    {Oper_t::SIN,    "SIN",    "sin",    0, 1},
+    {Oper_t::COS,    "COS",    "cos",    0, 1},
+    {Oper_t::TG,     "TG",     "tg",     0, 1},
+    {Oper_t::CTG,    "CTG",    "ctg",    0, 1},
+    {Oper_t::DEG,    "DEG",    "^",      0, 0},
+    {Oper_t::LN,     "LN",     "ln",     0, 1},
+    {Oper_t::LOG,    "LOG",    "log",    0, 0},
+    {Oper_t::ARCSIN, "ARCSIN", "arcsin", 0, 1},
+    {Oper_t::ARCCOS, "ARCCOS", "arccos", 0, 1},
+    {Oper_t::ARCTG,  "ARCTG",  "arctg",  0, 1},
+    {Oper_t::ARCCTG, "ARCCTG", "arcctg", 0, 1},
+    {Oper_t::SH,     "SH",     "sh",     0, 1},
+    {Oper_t::CH,     "CH",     "ch",     0, 1},
+    {Oper_t::TH,     "TH",     "th",     0, 1},
+    {Oper_t::CTH,    "CTH",    "cth",    0, 1},
+    {Oper_t::ARCSH,  "ARCSH",  "arcsh",  0, 1},
+    {Oper_t::ARCCH,  "ARCCH",  "arcch",  0, 1},
+    {Oper_t::ARCTH,  "ARCTH",  "arcth",  0, 1},
+    {Oper_t::ARCCTH, "ARCCTH", "arccth", 0, 1}
 };
 
 /*=====================================================================================*/
@@ -107,7 +132,3 @@ int       compare          ( const void* cmd_1, const void* cmd_2 );
 DiffErr_t DiffCtor         ( Diff_t* diff );
 void      DiffDtor         ( Diff_t* diff );
 DiffErr_t AddToNameTable   ( Diff_t* diff, char name );
-
-TreeNode_t* CreateNumNode (double val,  TreeNode_t* prev_node);
-TreeNode_t* CreateBinOp   (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node);
-TreeNode_t* CreateUnOp    (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node);

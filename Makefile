@@ -1,16 +1,17 @@
 CXX := g++
 
-INCLUDES := -I src -I stk_lib -I utils -I log_utils
+INCLUDES := -I src -I stk_lib -I utils -I log_utils -I input_func
 
 SOURCES := src/main.cpp src/tree.cpp src/diff_sup_func.cpp src/save_load_func.cpp src/diff_func.cpp \
-           src/eq_simpl.cpp src/menu.cpp src/errors.cpp\
+           src/eq_simpl.cpp src/menu.cpp src/errors.cpp \
            log_utils/tree_dump.cpp log_utils/dump_tex.cpp log_utils/logger.cpp \
-           utils/sup_func.cpp
+           utils/sup_func.cpp \
+           input_func/input.cpp
 
 
 OBJ_DIR := obj
 OBJECTS := $(SOURCES:%.cpp=$(OBJ_DIR)/%.o)
-TARGET := tree.exe
+TARGET := diff.exe
 
 DEBUG_FLAGS := -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
                -Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts \

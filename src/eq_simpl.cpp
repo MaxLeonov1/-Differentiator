@@ -4,17 +4,19 @@
 #include "eq_simpl.h"
 #include "../utils/sup_func.h"
 #include "../utils/colors.h"
+#include "../log_utils/dump_tex.h"
 
 /*=====================================================================================*/
 
-TreeNode_t* SimplConstTree(TreeNode_t* node) {
+TreeNode_t* SimplConstTree(TreeNode_t* node, int* simpl) {
     if (!node) return nullptr;
     
-    if (node->left) node->left = SimplConstTree(node->left);
-    if (node->right) node->right = SimplConstTree(node->right);
+    if (node->left) node->left = SimplConstTree(node->left, simpl);
+    if (node->right) node->right = SimplConstTree(node->right, simpl);
     
     double const_value;
     if (TryEvalConstTree(node, &const_value)) {
+        simpl++;
         TreeNode_t* parent = node->parent;
         DeleteNode(node);
         TreeNode_t* new_node = CreateNumNode(const_value, parent);
@@ -118,79 +120,84 @@ int TryEvalConstTree(TreeNode_t* node, double* result) {
 /*=====================================================================================*/
 
 #define SIMPL_NODE_(new_node)     \
+    *simpl++;                     \
     TreeNode_t* res = new_node;   \
     new_node = nullptr;           \
     DeleteNode(node);             \
-    return res;                   
+    return res;
+    
+#define _0_ADD_X_ node->left  && node->left->type  == Node_t::NUM && double_cmp(0, node->left->data.num)
+#define _X_ADD_0_ node->right && node->right->type == Node_t::NUM && double_cmp(0, node->right->data.num)
+#define _1_MUL_X_ node->left  && node->left->type  == Node_t::NUM && double_cmp(1, node->left->data.num)
+#define _0_MUL_X_ node->left  && node->left->type  == Node_t::NUM && double_cmp(0, node->left->data.num)
+#define _X_MUL_1_ node->right && node->right->type == Node_t::NUM && double_cmp(1, node->right->data.num)
+#define _X_MUL_0_ node->right && node->right->type == Node_t::NUM && double_cmp(0, node->right->data.num)
+#define _X_DIV_1_ node->right && node->right->type == Node_t::NUM && double_cmp(1, node->right->data.num)
+#define _X_DEG_0_ node->right && node->right->type == Node_t::NUM && double_cmp(0, node->right->data.num)
+#define _X_DEG_1_ node->right && node->right->type == Node_t::NUM && double_cmp(1, node->right->data.num)
 
-TreeNode_t* SimplTrivleCases(TreeNode_t* node){
+TreeNode_t* SimplTrivleCases(TreeNode_t* node, int* simpl){
 
-    if(node->left) node->left  = SimplTrivleCases(node->left);
-    if(node->left) node->right = SimplTrivleCases(node->right);
+    if(node->left) node->left  = SimplTrivleCases(node->left, simpl);
+    if(node->left) node->right = SimplTrivleCases(node->right, simpl);
 
     if (node->type == Node_t::OP_BIN) {
 
         switch(node->data.oper) {
 
+            case Oper_t::SUB:
             case Oper_t::ADD:
-
-                if (node->left && node->left->type == Node_t::NUM && 
-                    double_cmp(0, node->left->data.num)) {
+                if (_0_ADD_X_) {
                     SIMPL_NODE_(node->right)
                 }
-                if (node->right && node->right->type == Node_t::NUM && 
-                    double_cmp(0, node->right->data.num)) {
+                if (_X_ADD_0_) {
                     SIMPL_NODE_(node->left)
                 }
 
             case Oper_t::MULT:
-
-                if (node->left && node->left->type == Node_t::NUM) {
-                    if (double_cmp(1, node->left->data.num)) {
-                        SIMPL_NODE_(node->right)
-
-                    } else if (double_cmp(0, node->left->data.num)) {
-                        SIMPL_NODE_(node->left)
-                    }
+                if (_1_MUL_X_) {
+                    SIMPL_NODE_(node->right)
                 }
-
-                if (node->right && node->right->type == Node_t::NUM) {
-                    if (double_cmp(1, node->right->data.num)) {
-                        SIMPL_NODE_(node->left)
-
-                    } else if (double_cmp(0, node->right->data.num)) {
-                        SIMPL_NODE_(node->right)
-                    }
+                if (_0_MUL_X_) {
+                    SIMPL_NODE_(node->left)
                 }
-
+                if (_X_MUL_1_) {
+                    SIMPL_NODE_(node->left)
+                }
+                if (_X_MUL_0_) {
+                    SIMPL_NODE_(node->right)
+                }
             case Oper_t::DIV:
-                
-                if (node->right && node->right->type == Node_t::NUM && 
-                    double_cmp(1, node->right->data.num)) {
+                if (_X_DIV_1_) {
                     SIMPL_NODE_(node->left)
                 }
             
             case Oper_t::DEG:
-                
-                if (node->right && node->right->type == Node_t::NUM) {
-                    if (double_cmp(0, node->right->data.num)) {
-                        TreeNode_t* new_node = node->right;
-                        new_node->data.num = 1;
-                        node->right = nullptr;
-                        DeleteNode(node);
-                        return new_node;
-
-                    } else if (double_cmp(1, node->right->data.num)) {
-                        SIMPL_NODE_(node->left)
-                    }
+                if (_X_DEG_0_) {
+                    TreeNode_t* new_node = node->right;
+                    new_node->data.num = 1;
+                    node->right = nullptr;
+                    DeleteNode(node);
+                    return new_node;
+                } 
+                if (_X_DEG_1_) {
+                    SIMPL_NODE_(node->left)
                 }
         }
     }
-
     return node;
 }
 
 #undef SIMPL_NODE_
+#undef _0_ADD_X_
+#undef _X_ADD_0_
+#undef _1_MUL_X_
+#undef _0_MUL_X_
+#undef _X_MUL_1_
+#undef _X_MUL_0_
+#undef _X_DIV_1_
+#undef _X_DEG_0_
+#undef _X_DEG_1_
 
 /*=====================================================================================*/
 
@@ -198,8 +205,16 @@ DiffErr_t SimplTree(Diff_t* diff, int tree_idx) {
 
     _OK_STAT_
 
-    diff->forest[tree_idx]->root = SimplConstTree(diff->forest[tree_idx]->root);
-    diff->forest[tree_idx]->root = SimplTrivleCases(diff->forest[tree_idx]->root);
+    int simpl = 0;
+    do {
+        simpl = 0;
+        diff->forest[tree_idx]->root = SimplConstTree(diff->forest[tree_idx]->root, &simpl);
+        diff->forest[tree_idx]->root = SimplTrivleCases(diff->forest[tree_idx]->root, &simpl);
+    } while(simpl);
+    PrintMesAndEqToTex(
+        diff, diff->forest[tree_idx]->root,
+        "After some simple mathematical transformations,"
+        "which we leave to the attentive reader as a simple problem, we obtain:" );
 
     _RET_OK_
 }

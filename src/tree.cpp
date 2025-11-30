@@ -164,3 +164,67 @@ int AddEquation (Diff_t* diff, DiffErr_t* status) {
 
     return diff->tree_num - 1;
 }
+
+/*=====================================================================================*/
+
+TreeNode_t* CreateVarNode (int var_idx) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.var_idx = var_idx;
+    node->parent = nullptr;
+    node->left = nullptr;
+    node->right = nullptr;
+    node->type = Node_t::VAR;
+
+    return node;
+}
+
+/*=====================================================================================*/
+
+TreeNode_t* CreateNumNode (double val, TreeNode_t* prev_node) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.num = val;
+    node->parent = prev_node;
+    node->left = nullptr;
+    node->right = nullptr;
+    node->type = Node_t::NUM;
+
+    return node;
+}
+
+/*=====================================================================================*/
+
+TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.oper = oper;
+    node->parent = prev_node;
+    node->left = left;
+    node->right = right;
+    node->type = Node_t::OP_BIN;
+
+    return node;
+}
+ 
+/*=====================================================================================*/
+
+TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* right, TreeNode_t* prev_node) {
+
+    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
+    if (!node) return node;
+
+    node->data.oper = oper;
+    node->parent = prev_node;
+    node->left = nullptr;
+    node->right = right;
+    node->type = Node_t::OP_UN;
+
+    return node;
+}

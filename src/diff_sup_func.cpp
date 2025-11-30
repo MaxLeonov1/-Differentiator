@@ -124,55 +124,9 @@ DiffErr_t AddToNameTable ( Diff_t* diff, char name ) {
     }
 
     diff->name_table.buff[diff->name_table.num].name = name;
+    diff->name_table.buff[diff->name_table.num].val = 0;
+    //printf("%d\n", diff->name_table.buff[diff->name_table.num].name);
     diff->name_table.num++;
 
     _RET_OK_
-}
-
-/*=====================================================================================*/
-
-TreeNode_t* CreateNumNode (double val, TreeNode_t* prev_node) {
-
-    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!node) return node;
-
-    node->data.num = val;
-    node->parent = prev_node;
-    node->left = nullptr;
-    node->right = nullptr;
-    node->type = Node_t::NUM;
-
-    return node;
-}
-
-/*=====================================================================================*/
-
-TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node) {
-
-    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!node) return node;
-
-    node->data.oper = oper;
-    node->parent = prev_node;
-    node->left = left;
-    node->right = right;
-    node->type = Node_t::OP_BIN;
-
-    return node;
-}
- 
-/*=====================================================================================*/
-
-TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* right, TreeNode_t* prev_node) {
-
-    TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
-    if (!node) return node;
-
-    node->data.oper = oper;
-    node->parent = prev_node;
-    node->left = nullptr;
-    node->right = right;
-    node->type = Node_t::OP_UN;
-
-    return node;
 }

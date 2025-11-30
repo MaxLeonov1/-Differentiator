@@ -80,6 +80,11 @@ void        WriteToDisk  ( TreeNode_t* node, Var_t* name_table, FILE* disk );
 DiffErr_t   ReadFromDisk ( Diff_t* diff, const char* filename );
 TreeNode_t* ReadNode     ( char* buffer, size_t* pos, DiffErr_t* status, Diff_t* diff );
 
+TreeNode_t* CreateNumNode (double val,  TreeNode_t* prev_node);
+TreeNode_t* CreateBinOp   (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node);
+TreeNode_t* CreateUnOp    (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node);
+TreeNode_t* CreateVarNode (int var_idx);
+
 /*=====================================================================================*/
 
 #define _left_ 0

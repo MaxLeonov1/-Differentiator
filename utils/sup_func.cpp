@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <math.h>
@@ -21,18 +22,15 @@ unsigned int djb2hash ( const char* str ) {
 
 /*=====================================================================================*/
 
-int skip_space ( char* ptr, size_t* pos ) {
+int skip_space ( char** ptr ) {
 
-    int sp_count = 0;
+    int sp_cnt = 0;
 
-    while ( ptr[*pos] == ' ' ) {
-
-        sp_count++;
-        pos++;
-
+    while ( **ptr == ' ' ) {
+        sp_cnt++;
+        (*ptr)++;
     }
-
-    return sp_count;
+    return sp_cnt;
 
 }
 
@@ -71,3 +69,11 @@ int double_cmp (double double_1, double double_2) {
 
     return (fabs (double_1 - double_2) < error) ? 1 : 0;
 }
+
+/*=====================================================================================*/
+
+void reset_input_buff() {
+    
+    while (getchar() != '\n');
+
+} 

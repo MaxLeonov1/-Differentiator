@@ -5,28 +5,66 @@
 #include "logger.h"
 
 
-void CreateTexLog (Diff_t* diff, TreeNode_t* root ) {
 
-    static int call_num = 0;
-    char filename[MAX_STR_LEN_] = "";
-    const char* log_dir = GetGlobalLogDir();
+static FILE* GetTexFile() {
 
-    sprintf(filename, "%s%ctex_log.tex", log_dir, PATH_SEP);
+    char filename[MAX_STR_LEN_] = "";                         
+    const char* log_dir = GetGlobalLogDir();                  
+    sprintf(filename, "%s%ctex_log.tex", log_dir, PATH_SEP); 
 
-    FILE* file = fopen ( filename, "ab" );
-    if ( file == nullptr ) exit(0);
+    FILE* file = fopen ( filename, "ab" );                    
+    return file;                       
 
-    if (call_num == 0) {
-        fprintf(file, "\\documentclass{article}\n");
-        fprintf(file, "\\usepackage{amsmath}\n");
-        fprintf(file, "\\begin{document}\n\n");
-    }
-    call_num++;
+}
+
+
+
+void PrintTexLogHeader() {
+
+    FILE* file = GetTexFile();
+    if ( file == nullptr ) return;
+
+    fprintf(file, "\\documentclass{article}\n");
+    fprintf(file, "\\usepackage{amsmath}\n");
+    fprintf(file, "\\usepackage{breqn}\n");
+    fprintf(file, "\\begin{document}\n\n");
+
+    fclose(file);
+
+}
+
+
+
+void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes ) {
+
+    FILE* file = GetTexFile();
+    if ( file == nullptr ) return;
+
+    //fprintf(file, "Let's find derivative for: [i don't want to do this]\n");
+    fprintf(file, "%s\n", mes);
+    fprintf(file, "\\begin{dmath*} \n");
+    TreeDumpTex( root, file, diff);
+    fprintf(file, " \n\\end{dmath*}\n\n");
+    
+    fclose(file);
+
+
+}
+
+
+
+void CreateTexLog (Diff_t* diff, TreeNode_t* root, TreeNode_t* d_root ) {
+
+    FILE* file = GetTexFile();
+    if ( file == nullptr ) return;
     
     fprintf(file, "%s\n", RndLinkWords[rand()%rndw_num]);
-    fprintf(file, "\\begin{equation*} \n");
+    fprintf(file, "\\begin{dmath*} \n");
+    fprintf(file, "\\frac{d}{dx}(");
+    TreeDumpTex( d_root, file, diff);
+    fprintf(file, ") = ");
     TreeDumpTex( root, file, diff);
-    fprintf(file, " \n\\end{equation*}\n\n");
+    fprintf(file, " \n\\end{dmath*}\n\n");
     
     fclose(file);
 
@@ -37,13 +75,10 @@ void CreateTexLog (Diff_t* diff, TreeNode_t* root ) {
 void CloseTexLog () {
 
     char cmd[MAX_STR_LEN_] = "";
-    char filename[MAX_STR_LEN_] = "";
     const char* log_dir = GetGlobalLogDir();
 
-    sprintf(filename, "%s%ctex_log.tex", log_dir, PATH_SEP);
-
-    FILE* file = fopen ( filename, "ab" );
-    if ( file == nullptr ) exit(0);
+    FILE* file = GetTexFile();
+    if ( file == nullptr ) return;
 
     fprintf(file, "\\end{document}\n");
     fclose(file);
@@ -80,22 +115,6 @@ void TreeDumpTex (TreeNode_t* node, FILE* file, Diff_t* diff) {
 
 
 
-int get_priority(Oper_t oper) {
-
-    switch(oper) {
-        case Oper_t::DEG:
-            return 3;
-        case Oper_t::MULT: case Oper_t::DIV:
-            return 2;
-        default:
-            return 1;
-
-    }
-
-}
-
-
-
 void HandleNum (TreeNode_t* node, FILE* file) {
 
     fprintf(file, "%.2lf ", node->data.num);
@@ -123,26 +142,23 @@ void HandleOpersBin (TreeNode_t* node, FILE* file, Diff_t* diff) {
 
     } else if (node->data.oper == Oper_t::DEG) {
 
+        fprintf(file, "( ");
         TreeDumpTex(node->left, file, diff);
-        fprintf(file, "^{ ");
+        fprintf(file, ")^{ ");
         TreeDumpTex(node->right, file, diff);
         fprintf(file, "} ");
 
     } else if (node->data.oper == Oper_t::MULT) {
 
-        fprintf(file, "( ");
         TreeDumpTex(node->left, file, diff);
         fprintf(file, "\\cdot ");
         TreeDumpTex(node->right, file, diff);
-        fprintf(file, ") ");
 
     } else {
 
-        fprintf(file, "( ");
         TreeDumpTex(node->left, file, diff);
         fprintf(file, "%s ", diff->def_op_instr[node->data.oper].name);
         TreeDumpTex(node->right, file, diff);
-        fprintf(file, ") ");
     }
 
 }
@@ -155,4 +171,4 @@ void HandleOpersUn (TreeNode_t* node, FILE* file, Diff_t* diff) {
     TreeDumpTex(node->right, file, diff);
     fprintf(file, " )");
 
-}
+}   
