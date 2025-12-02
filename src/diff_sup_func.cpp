@@ -123,10 +123,36 @@ DiffErr_t AddToNameTable ( Diff_t* diff, char name ) {
             return DiffErr_t::MEM_ALLOC_ERR;
     }
 
-    diff->name_table.buff[diff->name_table.num].name = name;
-    diff->name_table.buff[diff->name_table.num].val = 0;
-    //printf("%d\n", diff->name_table.buff[diff->name_table.num].name);
-    diff->name_table.num++;
+    int is_found = 0;
+
+    for (int i = 0; i <= diff->name_table.num; i++) {
+        if (diff->name_table.buff[i].name == name) {
+            is_found++;
+        }
+    }
+
+    if (is_found == 0) {
+        diff->name_table.buff[diff->name_table.num].name = name;
+        diff->name_table.buff[diff->name_table.num].val = 0;
+        diff->name_table.num++;
+    }
 
     _RET_OK_
+}
+
+/*=====================================================================================*/
+
+int GetOperPriority (Oper_t oper) {
+
+    switch(oper) {
+
+        case Oper_t::ADD:
+        case Oper_t::SUB:
+            return 1;
+
+        default:
+            return 2;
+
+    }
+
 }

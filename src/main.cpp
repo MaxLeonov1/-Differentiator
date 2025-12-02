@@ -5,15 +5,14 @@
 #include "eq_simpl.h"
 #include "menu.h"
 #include "../input_func/input.h"
+#include "../utils/colors.h"
 
 int main(int argc, char* argv[]) {
-
-    const char* str = "5 - sin ( 5 + x ) + ( 2 + y )^4$";
 
     _OK_STAT_
     DIFF_INIT(diff_1)
 
-    CmdLineArgs args = ParseCmdLineArgs(argc, argv);
+    CmdLineArgs args = ParseCmdLineArgs(argc, argv, &diff_1);
     
     DiffCtor(&diff_1);
     
@@ -25,7 +24,7 @@ int main(int argc, char* argv[]) {
         HandleMenuChoice(&diff_1, choice, &status, &args);
             
         if (status != DiffErr_t::TREE_OK) {
-            printf("[ERROR: %d][%s]\n", status, StatusCodeToStr(status));
+            printf("%s[ERROR: %d][%s]%s\n",  status, StatusCodeToStr(status));
         }
             
     } while (choice != MenuOption::EXIT);

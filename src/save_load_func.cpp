@@ -6,6 +6,7 @@
 #include "../input_func/input.h"
 #include "../utils/sup_func.h"
 #include "../log_utils/logger.h"
+#include "differentiator.h"
 
 /*=====================================================================================*/
 
@@ -22,7 +23,7 @@ DiffErr_t SaveToDisk ( Diff_t* diff, int tree_idx, const char* disk_name ) {
 
     if (!diff->forest[tree_idx]->root) return DiffErr_t::EMPTY_TREE_ACT_ERR;
 
-    WriteToDisk(diff->forest[tree_idx]->root, diff->name_table.buff, disk);
+    WriteEqToFile(diff->forest[tree_idx]->root, nullptr, diff->name_table.buff, disk);
 
     fclose(disk);
 
@@ -32,34 +33,46 @@ DiffErr_t SaveToDisk ( Diff_t* diff, int tree_idx, const char* disk_name ) {
 
 /*=====================================================================================*/
 
-void WriteToDisk ( TreeNode_t* node, Var_t* name_table, FILE* disk ) {
+#define _Wl if(node->left)  WriteEqToFile(node->left, node, name_table, disk);
+#define _Wr if(node->right) WriteEqToFile(node->right, node, name_table, disk);
+#define _IF_PR_LOW(source) if (node->data.oper == Oper_t::ADD || node->data.oper == Oper_t::SUB) {source}
+
+void WriteEqToFile ( TreeNode_t* node, TreeNode_t* prev_node, Var_t* name_table, FILE* disk ) {
 
     assert(node);
     assert(name_table);
     assert(disk);
 
-    if (node->left)
-        WriteToDisk(node->left, name_table, disk);
+    int parent_priority = 0, node_priority = 0;
+    node_priority = GetOperPriority(node->data.oper);
+    if (prev_node)
+        parent_priority = GetOperPriority(prev_node->data.oper);
 
     switch(node->type) {
         case Node_t::NUM:
-            fprintf(disk, " %lg ", node->data.num);
+            fprintf(disk, "%lg ", node->data.num);
             break;
         case Node_t::OP_BIN:
-            fprintf(disk, " %s ", OperInstructions[node->data.oper].name);
+            if (parent_priority > node_priority) fprintf(disk, "(");
+            _Wl
+            fprintf(disk, "%s ", OperInstructions[node->data.oper].name);
+            _Wr
+            if (parent_priority > node_priority) fprintf(disk, ")");
             break;
         case Node_t::OP_UN:
-            fprintf(disk, " %s ", OperInstructions[node->data.oper].name);
+            fprintf(disk, "%s(", OperInstructions[node->data.oper].name);
+            _Wr
+            fprintf(disk, ")");
             break;
         case Node_t::VAR:
-            fprintf(disk, " %c ", name_table[node->data.var_idx].name);
+            fprintf(disk, "%c ", name_table[node->data.var_idx].name);
             break;
     }
-    
-    if (node->right)
-        WriteToDisk(node->right, name_table, disk);
-
 }
+
+#undef _Wl
+#undef _Wr
+#undef _IF_PR_LOW
 
 /*=====================================================================================*/
 

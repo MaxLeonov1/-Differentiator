@@ -46,9 +46,9 @@ TreeNode_t* GetE (Diff_t* diff, char** str) {
         skip_space(str);
         
         if (op == '+')
-            val = CreateBinOp(Oper_t::ADD, val, val2, nullptr);
+            val = CreateBinOp(Oper_t::ADD, val, val2);
         else
-            val = CreateBinOp(Oper_t::SUB, val, val2, nullptr);
+            val = CreateBinOp(Oper_t::SUB, val, val2);
     }
 
     skip_space(str);
@@ -74,9 +74,9 @@ TreeNode_t* GetT (Diff_t* diff,  char** str) {
         skip_space(str);
 
         if (op == '*')
-            val = CreateBinOp(Oper_t::MULT, val, val2, nullptr);
+            val = CreateBinOp(Oper_t::MULT, val, val2);
         else
-            val = CreateBinOp(Oper_t::DIV, val, val2, nullptr);
+            val = CreateBinOp(Oper_t::DIV, val, val2);
     }
 
     skip_space(str);
@@ -97,7 +97,7 @@ TreeNode_t* GetDeg (Diff_t* diff,  char** str) {
         (*str)++;
         TreeNode_t* val2 = GetFunc(diff, str);
 
-        val = CreateBinOp(Oper_t::DEG, val, val2, nullptr);
+        val = CreateBinOp(Oper_t::DEG, val, val2);
     }
     return val;
 
@@ -124,7 +124,7 @@ TreeNode_t* GetFunc (Diff_t* diff,  char** str) {
     } else if (diff->sort_op_instr[idx].is_sing) {
         (*str)+=len;
         
-        return CreateUnOp(diff->sort_op_instr[idx].code, GetP(diff, str), nullptr);
+        return CreateUnOp(diff->sort_op_instr[idx].code, GetP(diff, str));
     }
 
 }
@@ -161,7 +161,7 @@ TreeNode_t* GetN ( char** str) {
         (*str)++;
     }
     
-    return CreateNumNode(double(val), nullptr);
+    return CreateNumNode(double(val));
 }
 
 
@@ -171,6 +171,7 @@ TreeNode_t* GetV ( char** str, Diff_t* diff) {;
     skip_space(str);
 
     AddToNameTable(diff, **str);
+
     (*str)++;
 
     return CreateVarNode(diff->name_table.num-1);

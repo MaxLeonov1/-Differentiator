@@ -15,6 +15,8 @@ typedef enum{
     INC_MATH_OP = 8,
     INC_NODE_TYPE = 9,
     TREE_STRUCT_ERR = 10,
+    VAR_PLOT_ERR = 11,
+    INVALID_TREE_IDX = 12,
 
 } DiffErr_t;
 

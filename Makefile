@@ -5,6 +5,7 @@ INCLUDES := -I src -I stk_lib -I utils -I log_utils -I input_func
 SOURCES := src/main.cpp src/tree.cpp src/diff_sup_func.cpp src/save_load_func.cpp src/diff_func.cpp \
            src/eq_simpl.cpp src/menu.cpp src/errors.cpp \
            log_utils/tree_dump.cpp log_utils/dump_tex.cpp log_utils/logger.cpp \
+           log_utils/visuals.cpp \
            utils/sup_func.cpp \
            input_func/input.cpp
 

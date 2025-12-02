@@ -17,9 +17,8 @@ TreeNode_t* SimplConstTree(TreeNode_t* node, int* simpl) {
     double const_value;
     if (TryEvalConstTree(node, &const_value)) {
         simpl++;
-        TreeNode_t* parent = node->parent;
         DeleteNode(node);
-        TreeNode_t* new_node = CreateNumNode(const_value, parent);
+        TreeNode_t* new_node = CreateNumNode(const_value);
         return new_node;
     }
 

@@ -96,6 +96,12 @@ typedef struct {
 
 typedef struct {
 
+    int simpl_tree;
+
+} LogParams_t;
+
+typedef struct {
+
     int op_num;
 
     int max_eq_num;
@@ -106,6 +112,8 @@ typedef struct {
     OperInstr_t* sort_op_instr;
 
     NameTable_t name_table;
+
+    LogParams_t log_params;
 
 } Diff_t;
 
@@ -121,7 +129,10 @@ typedef struct {
         .num = 0,                       \
         .buff = nullptr,                \
     },                                  \
-};
+    .log_params = {                     \
+        .simpl_tree = 0,                \
+    },                                  \
+};                                      
 
 /*=====================================================================================*/
 
@@ -132,3 +143,4 @@ int       compare          ( const void* cmd_1, const void* cmd_2 );
 DiffErr_t DiffCtor         ( Diff_t* diff );
 void      DiffDtor         ( Diff_t* diff );
 DiffErr_t AddToNameTable   ( Diff_t* diff, char name );
+int       GetOperPriority  ( Oper_t oper);

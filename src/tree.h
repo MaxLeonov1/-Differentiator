@@ -40,7 +40,6 @@ struct TreeNode {
     Val_t       data;
     TreeNode_t* left;
     TreeNode_t* right;
-    TreeNode_t* parent;
 
 };
 
@@ -70,19 +69,17 @@ void        TreeCtor          ( Tree_t* tree );
 DiffErr_t   TreeDtor          ( Tree_t* tree );
 DiffErr_t   AllocNode         ( TreeNode_t** node, Node_t node_t );
 DiffErr_t   DeleteNode        ( TreeNode* node );
-DiffErr_t   InsertNode        ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t* prev_node );
-TreeNode_t* CopyTree          ( TreeNode_t* node, TreeNode_t* prev_node );
-DiffErr_t   CreateNodeFromStr ( const char* str, Diff_t* diff, TreeNode_t** new_node );
+DiffErr_t   InsertNode        ( TreeNode_t** node, Val_t value, Node_t node_t);
+TreeNode_t* CopyTree          ( TreeNode_t* node);
 int         AddEquation       (Diff_t* diff, DiffErr_t* status);
 
 DiffErr_t   SaveToDisk   ( Diff_t* diff, int tree_idx, const char* disk_name );
-void        WriteToDisk  ( TreeNode_t* node, Var_t* name_table, FILE* disk );
+void        WriteEqToFile  ( TreeNode_t* node, TreeNode_t* prev_node, Var_t* name_table, FILE* disk );
 DiffErr_t   ReadFromDisk ( Diff_t* diff, const char* filename );
-TreeNode_t* ReadNode     ( char* buffer, size_t* pos, DiffErr_t* status, Diff_t* diff );
 
-TreeNode_t* CreateNumNode (double val,  TreeNode_t* prev_node);
-TreeNode_t* CreateBinOp   (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node);
-TreeNode_t* CreateUnOp    (Oper_t oper, TreeNode_t* left, TreeNode_t* prev_node);
+TreeNode_t* CreateNumNode (double val);
+TreeNode_t* CreateBinOp   (Oper_t oper, TreeNode_t* left, TreeNode_t* right);
+TreeNode_t* CreateUnOp    (Oper_t oper, TreeNode_t* left);
 TreeNode_t* CreateVarNode (int var_idx);
 
 /*=====================================================================================*/

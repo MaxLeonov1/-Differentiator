@@ -20,12 +20,13 @@ static const char* RndLinkWords[] = {
 
 
 
-void PrintTexLogHeader ();
-void TreeDumpTex    (TreeNode_t* node, FILE* file, Diff_t* diff);
-void HandleNum      (TreeNode_t* node, FILE* file);
-void HandleVar      (TreeNode_t* node, FILE* file, Diff_t* diff);
-void HandleOpersBin (TreeNode_t* node, FILE* file, Diff_t* diff);
-void HandleOpersUn  (TreeNode_t* node, FILE* file, Diff_t* diff);
+void PrintTexLogHeader  ();
+void TreeDumpTex        (TreeNode_t* node, FILE* file, Diff_t* diff);
+void HandleNum          (TreeNode_t* node, FILE* file);
+void HandleVar          (TreeNode_t* node, FILE* file, Diff_t* diff);
+void HandleOpersBin     (TreeNode_t* node, FILE* file, Diff_t* diff);
+void HandleOpersUn      (TreeNode_t* node, FILE* file, Diff_t* diff);
 void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes );
-void CreateTexLog   (Diff_t* diff, TreeNode_t* root, TreeNode_t* d_root);
-void CloseTexLog ();
+void CreateTexLog       (Diff_t* diff, TreeNode_t* root, TreeNode_t* d_root);
+void PutImgToLog        (Diff_t* diff, const char* img_filename );
+void CloseTexLog        ();

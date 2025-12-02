@@ -24,10 +24,17 @@ void PrintTexLogHeader() {
     FILE* file = GetTexFile();
     if ( file == nullptr ) return;
 
-    fprintf(file, "\\documentclass{article}\n");
-    fprintf(file, "\\usepackage{amsmath}\n");
-    fprintf(file, "\\usepackage{breqn}\n");
-    fprintf(file, "\\begin{document}\n\n");
+    fprintf(
+        file, 
+        "\\documentclass{article}\n"
+        "\\usepackage{amsmath}\n"
+        "\\usepackage{breqn}\n"
+        "\\usepackage{graphicx}"
+        "\\usepackage{float}\n"
+        //"\\graphicspath{img/}"
+        "\\DeclareGraphicsExtensions{.pdf,.png,.jpg}"
+        "\\begin{document}\n\n"
+    );
 
     fclose(file);
 
@@ -61,11 +68,32 @@ void CreateTexLog (Diff_t* diff, TreeNode_t* root, TreeNode_t* d_root ) {
     fprintf(file, "%s\n", RndLinkWords[rand()%rndw_num]);
     fprintf(file, "\\begin{dmath*} \n");
     fprintf(file, "\\frac{d}{dx}(");
-    TreeDumpTex( d_root, file, diff);
-    fprintf(file, ") = ");
     TreeDumpTex( root, file, diff);
+    fprintf(file, ") = ");
+    TreeDumpTex( d_root, file, diff);
     fprintf(file, " \n\\end{dmath*}\n\n");
     
+    fclose(file);
+
+}
+
+
+
+void PutImgToLog (Diff_t* diff, const char* img_filename ) {
+
+    FILE* file = GetTexFile();
+    if ( file == nullptr ) return;
+
+    fprintf(file, "And you may have a look at graphic:\n");
+    fprintf(
+        file,
+        "\\begin{figure}[H]\n"
+        "\\centering\n"
+        "\\includegraphics[scale=0.5]{%s}\n"
+        "\\end{figure}\n",
+        img_filename
+    );
+
     fclose(file);
 
 }
@@ -117,7 +145,7 @@ void TreeDumpTex (TreeNode_t* node, FILE* file, Diff_t* diff) {
 
 void HandleNum (TreeNode_t* node, FILE* file) {
 
-    fprintf(file, "%.2lf ", node->data.num);
+    fprintf(file, "%lg ", node->data.num);
 
 }
 

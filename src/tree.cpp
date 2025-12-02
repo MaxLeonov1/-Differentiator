@@ -47,7 +47,6 @@ DiffErr_t AllocNode ( TreeNode_t** node, Node_t node_t ) {
     node_ptr->type = node_t;
     node_ptr->left = nullptr;
     node_ptr->right = nullptr;
-    node_ptr->parent = nullptr;
 
     *node = node_ptr; 
 
@@ -74,7 +73,7 @@ DiffErr_t DeleteNode ( TreeNode* node ) {
 
 /*=====================================================================================*/
 
-DiffErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t* prev_node ) {
+DiffErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t ){
 
     assert(node);
     _OK_STAT_
@@ -99,7 +98,6 @@ DiffErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t
             break;
     }
 
-    node_new->parent = prev_node;
     *node = node_new;
 
     _RET_OK_
@@ -108,7 +106,7 @@ DiffErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t, TreeNode_t
 
 /*=====================================================================================*/
 
-TreeNode_t* CopyTree ( TreeNode_t* node, TreeNode_t* prev_node ) {
+TreeNode_t* CopyTree ( TreeNode_t* node) {
 
     if (node == nullptr) return nullptr;
 
@@ -116,13 +114,12 @@ TreeNode_t* CopyTree ( TreeNode_t* node, TreeNode_t* prev_node ) {
     if (new_node == nullptr) return new_node;
 
     new_node->data.num = node->data.num;
-    new_node->parent = prev_node;
     new_node->type = node->type;
 
     if(node->left != nullptr)
-        new_node->left = CopyTree (node->left, new_node);
+        new_node->left = CopyTree (node->left);
     if(node->right != nullptr)
-        new_node->right = CopyTree (node->right, new_node);
+        new_node->right = CopyTree (node->right);
 
     return new_node;
 
@@ -173,7 +170,6 @@ TreeNode_t* CreateVarNode (int var_idx) {
     if (!node) return node;
 
     node->data.var_idx = var_idx;
-    node->parent = nullptr;
     node->left = nullptr;
     node->right = nullptr;
     node->type = Node_t::VAR;
@@ -183,13 +179,12 @@ TreeNode_t* CreateVarNode (int var_idx) {
 
 /*=====================================================================================*/
 
-TreeNode_t* CreateNumNode (double val, TreeNode_t* prev_node) {
+TreeNode_t* CreateNumNode (double val) {
 
     TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
     if (!node) return node;
 
     node->data.num = val;
-    node->parent = prev_node;
     node->left = nullptr;
     node->right = nullptr;
     node->type = Node_t::NUM;
@@ -199,13 +194,12 @@ TreeNode_t* CreateNumNode (double val, TreeNode_t* prev_node) {
 
 /*=====================================================================================*/
 
-TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeNode_t* prev_node) {
+TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right) {
 
     TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
     if (!node) return node;
 
     node->data.oper = oper;
-    node->parent = prev_node;
     node->left = left;
     node->right = right;
     node->type = Node_t::OP_BIN;
@@ -215,13 +209,12 @@ TreeNode_t* CreateBinOp (Oper_t oper, TreeNode_t* left, TreeNode_t* right, TreeN
  
 /*=====================================================================================*/
 
-TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* right, TreeNode_t* prev_node) {
+TreeNode_t* CreateUnOp (Oper_t oper, TreeNode_t* right) {
 
     TreeNode_t* node = (TreeNode_t*)calloc(1, sizeof(TreeNode_t));
     if (!node) return node;
 
     node->data.oper = oper;
-    node->parent = prev_node;
     node->left = nullptr;
     node->right = right;
     node->type = Node_t::OP_UN;

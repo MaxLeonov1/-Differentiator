@@ -193,20 +193,30 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text, Diff_t* diff) 
             break;
     }
 
-    fprintf(
-        graph_text, 
-        "node_%d[shape=Mrecord, rank=%d, %s"
-        "label=\" { %p | type: %s | data: %s |  parent: %p | { Left: %p | Right: %p } } \",];\n",
-        idx,
-        rank,
-        color,
-        node,
-        type,
-        data,
-        node->parent,
-        node->left,
-        node->right
-    );
+    if (diff->log_params.simpl_tree)
+        fprintf(
+            graph_text, 
+            "node_%d[shape=Mrecord, rank=%d, %s"
+            "label=\"%s\",];\n",
+            idx,
+            rank,
+            color,
+            data
+        );
+    else
+        fprintf(
+            graph_text, 
+            "node_%d[shape=Mrecord, rank=%d, %s"
+            "label=\" { %p | type: %s | data: %s | { Left: %p | Right: %p } } \",];\n",
+            idx,
+            rank,
+            color,
+            node,
+            type,
+            data,
+            node->left,
+            node->right
+        );
 
     if (node->left) {
         fprintf(

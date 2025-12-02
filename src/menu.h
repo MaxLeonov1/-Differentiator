@@ -18,13 +18,13 @@ typedef enum {
     SAVE_FILE = 2,
     DIFFERENTIATE = 3,
     CALCULATE_VALUE = 4,
-    TAYLOR_SERIES = 5,
+    STD_WORKING_MODE = 5,
     EXIT = 6
 } MenuOption;
 
 
 void ShowCmdOp();
-CmdLineArgs ParseCmdLineArgs (int argc, char* argv[]);
+CmdLineArgs ParseCmdLineArgs (int argc, char* argv[], Diff_t* diff);
 void ShowMainMenu();
 MenuOption GetMenuChoice();
 void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLineArgs* args);
