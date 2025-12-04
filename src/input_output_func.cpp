@@ -2,11 +2,7 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "tree.h"
-#include "../input_func/input.h"
-#include "../utils/sup_func.h"
-#include "../log_utils/logger.h"
-#include "differentiator.h"
+#include "input_output_func.h"
 
 /*=====================================================================================*/
 
@@ -91,7 +87,7 @@ DiffErr_t ReadFromDisk (Diff_t* diff, const char* filename ) {
     if (!buffer) return DiffErr_t::MEM_ALLOC_ERR;
     fread(buffer, sizeof(buffer[0]), (size_t)byte_num + _buff_byte_padding_, file);
 
-    diff->forest[0]->root = GetG(diff, &buffer, &status);
+    diff->forest[0]->root = GetExpr(diff, &buffer, &status);
     if (!diff->forest[0]->root) return status;
 
     if (status == DiffErr_t::READ_SYNTAX_ERR ) {

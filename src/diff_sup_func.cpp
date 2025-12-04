@@ -4,6 +4,7 @@
 #include "differentiator.h"
 #include "tree.h"
 #include "../utils/sup_func.h"
+#include "diff_calc_func.h"
 
 /*=====================================================================================*/
 
@@ -83,6 +84,9 @@ DiffErr_t DiffCtor ( Diff_t* diff ) {
     HashAndCopyInstr(OperInstructions, diff);
     SortInstrByHash(diff);
 
+    InitCalcFuncs();
+    InitDiffFuncs();
+
     if (!diff->def_op_instr ||
         !diff->sort_op_instr)
         return DiffErr_t::MEM_ALLOC_ERR;
@@ -149,6 +153,9 @@ int GetOperPriority (Oper_t oper) {
         case Oper_t::ADD:
         case Oper_t::SUB:
             return 1;
+
+        case Oper_t::DEG:
+            return 3;
 
         default:
             return 2;

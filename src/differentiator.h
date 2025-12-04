@@ -96,7 +96,17 @@ typedef struct {
 
 typedef struct {
 
+    double x_max;
+    double x_min;
+    double y_max;
+    double y_min;
+
+} Graph_t;
+
+typedef struct {
+
     int simpl_tree;
+    Graph_t graph;
 
 } LogParams_t;
 
@@ -131,6 +141,12 @@ typedef struct {
     },                                  \
     .log_params = {                     \
         .simpl_tree = 0,                \
+        .graph = {                      \
+            .x_max = 0,                 \
+            .x_min = 0,                 \
+            .y_max = 0,                 \
+            .y_min = 0,                 \
+        },                              \
     },                                  \
 };                                      
 

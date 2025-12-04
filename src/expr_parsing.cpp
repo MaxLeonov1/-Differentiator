@@ -2,14 +2,29 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "input.h"
-#include "../utils/sup_func.h"
+#include "input_output_func.h"
 
 
 #define MAX_OP_LEN_ 10
+#define DEF_X_MAX_ 10
+#define DEF_X_MIN_ -10
+#define DEF_Y_MAX_ 10
+#define DEF_Y_MIN_ -10
 
 
-TreeNode_t* GetG (Diff_t* diff, char** str, DiffErr_t* status) {
+
+static void GetGraphParams (Diff_t* diff, char** str, DiffErr_t* status);
+static TreeNode_t* GetE    (Diff_t* diff, char** str);
+static TreeNode_t* GetT    (Diff_t* diff, char** str);
+static TreeNode_t* GetFunc (Diff_t* diff, char** str);
+static TreeNode_t* GetDeg  (Diff_t* diff, char** str);
+static TreeNode_t* GetP    (Diff_t* diff, char** str);
+static TreeNode_t* GetV    (char** str, Diff_t* diff);
+static TreeNode_t* GetN    (char** str);
+
+
+
+TreeNode_t* GetExpr (Diff_t* diff, char** str, DiffErr_t* status) {
 
     assert(diff);
     assert(str);
@@ -22,8 +37,9 @@ TreeNode_t* GetG (Diff_t* diff, char** str, DiffErr_t* status) {
         *status = DiffErr_t::READ_SYNTAX_ERR;
         return val;
     }
-    
     (*str)++;
+
+    GetGraphParams(diff, str, status);
 
     return val;
 
@@ -31,7 +47,49 @@ TreeNode_t* GetG (Diff_t* diff, char** str, DiffErr_t* status) {
 
 
 
-TreeNode_t* GetE (Diff_t* diff, char** str) {
+static void GetGraphParams (Diff_t* diff, char** str, DiffErr_t* status) {
+
+    double min = 0, max = 0;
+    int len = 0, scanned = 0;
+
+    scanned = sscanf(*str, " x[%lf:%lf]%n", &min, &max, &len );
+    *(*str+=len);
+    
+    if (scanned == 2 && max > min) {
+        diff->log_params.graph.x_max = max;
+        diff->log_params.graph.x_min = min;
+
+    } else {
+        diff->log_params.graph.x_max = DEF_X_MAX_;
+        diff->log_params.graph.x_min = DEF_X_MIN_;
+
+    }
+    len = 0;
+    scanned = sscanf(*str, " y[%lf:%lf]%n", &min, &max, &len );
+    *(*str+=len);
+
+    if (scanned == 2 && max > min) {
+        diff->log_params.graph.y_max = max;
+        diff->log_params.graph.y_min = min;
+
+    } else {
+        diff->log_params.graph.y_max = DEF_Y_MAX_;
+        diff->log_params.graph.y_min = DEF_Y_MIN_;
+
+    }
+
+    // printf(
+    //     "%lf:%lf  %lf:%lf\n",
+    //     diff->log_params.graph.x_min,
+    //     diff->log_params.graph.x_max,
+    //     diff->log_params.graph.y_min,
+    //     diff->log_params.graph.y_max);
+
+}
+
+
+
+static TreeNode_t* GetE (Diff_t* diff, char** str) {
 
     skip_space(str);
 
@@ -59,7 +117,7 @@ TreeNode_t* GetE (Diff_t* diff, char** str) {
 
 
 
-TreeNode_t* GetT (Diff_t* diff,  char** str) {
+static TreeNode_t* GetT (Diff_t* diff,  char** str) {
 
     skip_space(str);
 
@@ -86,7 +144,7 @@ TreeNode_t* GetT (Diff_t* diff,  char** str) {
 
 
 
-TreeNode_t* GetDeg (Diff_t* diff,  char** str) {
+static TreeNode_t* GetDeg (Diff_t* diff,  char** str) {
 
     skip_space(str);
 
@@ -106,7 +164,7 @@ TreeNode_t* GetDeg (Diff_t* diff,  char** str) {
 
 
 
-TreeNode_t* GetFunc (Diff_t* diff,  char** str) {
+static TreeNode_t* GetFunc (Diff_t* diff,  char** str) {
 
     skip_space(str);
 
@@ -131,7 +189,7 @@ TreeNode_t* GetFunc (Diff_t* diff,  char** str) {
 
 
 
-TreeNode_t* GetP (Diff_t* diff,  char** str) {
+static TreeNode_t* GetP (Diff_t* diff,  char** str) {
 
     skip_space(str);
 
@@ -150,7 +208,7 @@ TreeNode_t* GetP (Diff_t* diff,  char** str) {
 
 
 
-TreeNode_t* GetN ( char** str) {
+static TreeNode_t* GetN ( char** str) {
 
     skip_space(str);
 
@@ -165,8 +223,8 @@ TreeNode_t* GetN ( char** str) {
 }
 
 
-
-TreeNode_t* GetV ( char** str, Diff_t* diff) {;
+ 
+static TreeNode_t* GetV ( char** str, Diff_t* diff) {;
 
     skip_space(str);
 

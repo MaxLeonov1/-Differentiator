@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "tree_dump.h"
 #include "errors.h"
+#include "../src/err_func.h"
 
 #pragma GCC diagnostic ignored "-Wformat=2"
 #pragma GCC diagnostic ignored "-Wformat-overflow"

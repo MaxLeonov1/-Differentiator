@@ -152,6 +152,7 @@ TreeNode_t* SimplTrivleCases(TreeNode_t* node, int* simpl){
                 if (_X_ADD_0_) {
                     SIMPL_NODE_(node->left)
                 }
+                break;
 
             case Oper_t::MULT:
                 if (_1_MUL_X_) {
@@ -166,10 +167,13 @@ TreeNode_t* SimplTrivleCases(TreeNode_t* node, int* simpl){
                 if (_X_MUL_0_) {
                     SIMPL_NODE_(node->right)
                 }
+                break;
+
             case Oper_t::DIV:
                 if (_X_DIV_1_) {
                     SIMPL_NODE_(node->left)
                 }
+                break;
             
             case Oper_t::DEG:
                 if (_X_DEG_0_) {
@@ -182,6 +186,7 @@ TreeNode_t* SimplTrivleCases(TreeNode_t* node, int* simpl){
                 if (_X_DEG_1_) {
                     SIMPL_NODE_(node->left)
                 }
+                break;
         }
     }
     return node;
@@ -199,7 +204,7 @@ TreeNode_t* SimplTrivleCases(TreeNode_t* node, int* simpl){
 #undef _X_DEG_1_
 
 /*=====================================================================================*/
-
+#include "tree_dump.h"
 DiffErr_t SimplTree(Diff_t* diff, int tree_idx) {
 
     _OK_STAT_
@@ -209,6 +214,7 @@ DiffErr_t SimplTree(Diff_t* diff, int tree_idx) {
         simpl = 0;
         diff->forest[tree_idx]->root = SimplConstTree(diff->forest[tree_idx]->root, &simpl);
         diff->forest[tree_idx]->root = SimplTrivleCases(diff->forest[tree_idx]->root, &simpl);
+
     } while(simpl);
     PrintMesAndEqToTex(
         diff, diff->forest[tree_idx]->root,

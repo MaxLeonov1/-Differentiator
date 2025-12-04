@@ -1,11 +1,12 @@
 #include "tree.h"
 #include "differentiator.h"
 #include "../log_utils/logger.h"
-#include "diff_func.h"
+#include "main_func.h"
 #include "eq_simpl.h"
 #include "menu.h"
-#include "../input_func/input.h"
+#include "input_output_func.h"
 #include "../utils/colors.h"
+#include "err_func.h"
 
 int main(int argc, char* argv[]) {
 
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]) {
         HandleMenuChoice(&diff_1, choice, &status, &args);
             
         if (status != DiffErr_t::TREE_OK) {
-            printf("%s[ERROR: %d][%s]%s\n",  status, StatusCodeToStr(status));
+            printf("%s[ERROR: %d][%s]%s\n", RED, status, StatusCodeToStr(status), RES_COL);
         }
             
     } while (choice != MenuOption::EXIT);

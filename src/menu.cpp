@@ -2,13 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "colors.h"
-#include "../utils/sup_func.h"
-#include "../log_utils/logger.h"
-#include "../log_utils/visuals.h"
 #include "menu.h"
-#include "diff_func.h"
-#include "eq_simpl.h"
 
 
 
@@ -101,6 +95,12 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
 
             if (*status == DiffErr_t::TREE_OK)
                 printf("Expression loaded successfully\n");
+            
+            PrintMesAndEqToTex(diff, diff->forest[0]->root,
+                               "So we have this equation, and we are going to do "
+                               "something with it [at this moment i dont know what"
+                               " **** we are going to involve this equation to]");
+
             TreeDump(diff, 0, *status, nullptr);
             break;
         }    
@@ -134,7 +134,7 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
             if (*status == DiffErr_t::TREE_OK)
                 printf("Differentiation completed\n");
         
-            _IF_DEBUG(TreeDump(diff, 0, *status, nullptr))
+            _IF_DEBUG(TreeDump(diff, 0, *status, nullptr);)
             QuickPlotPDF(diff, diff->forest[0]->root, "output_graph.pdf", dir_var);
             QuickPlotPDF(diff, diff->forest[1]->root, "output_graph.pdf", dir_var);
             CreatePlotPDF();
@@ -144,7 +144,7 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
         case MenuOption::CALCULATE_VALUE: {
             NO_LOAD_TERM_
 
-            printf("Enter calc expression idx: ");
+            printf("Enter calc expression idx: \n");
             scanf("%d", &expr_idx);
             if (expr_idx < diff->tree_num) {
                 printf("There is no expression with such idx.\n");
@@ -165,13 +165,28 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
             if (*status == DiffErr_t::TREE_OK)
                 printf("Differentiation completed\n");
             
-            _IF_DEBUG(TreeDump(diff, 0, *status, nullptr))
+            _IF_DEBUG(TreeDump(diff, 0, *status, nullptr);)
 
-            *status = CreateTaylorSeriesEquation(diff, 0, dir_deg, dir_var, 3);
+            int x0 = 0;
+            printf("Enter decomposition point for Taylor series:\n");
+            scanf("%d", &x0);
+
+            *status = CreateTaylorSeriesEquation(diff, 0, dir_deg, dir_var, x0);
             if (*status != DiffErr_t::TREE_OK) return;
 
+            
+            PrintSectionHeaderToTex("Getting Taylor Series!");
+            PrintMesAndEqToTex(diff, diff->forest[0]->root,
+                               "No one asked, but we will find Taylor series for this equation:");
+            PrintMesAndTaylorEqToTex(diff, diff->forest[dir_deg+1]->root,
+                                     "Using our derivatives, we obtain:",
+                                     x0, dir_deg );
             SimplTree(diff, dir_deg+1);
-            TreeDump(diff, dir_deg+1, *status, nullptr);
+            PrintMesAndTaylorEqToTex(diff, diff->forest[dir_deg+1]->root,
+                                     "So, we have simplified Taylor series:",
+                                     x0, dir_deg );
+
+            _IF_DEBUG(TreeDump(diff, dir_deg+1, *status, nullptr);)
             QuickPlotPDF(diff, diff->forest[0]->root, "output_graph.pdf", dir_var);
             QuickPlotPDF(diff, diff->forest[dir_deg+1]->root, "output_graph.pdf", dir_var);
             CreatePlotPDF();

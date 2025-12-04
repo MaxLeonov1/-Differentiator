@@ -2,6 +2,13 @@
 #pragma once
 
 #include "differentiator.h"
+#include "colors.h"
+#include "../utils/sup_func.h"
+#include "../log_utils/logger.h"
+#include "../log_utils/visuals.h"
+#include "main_func.h"
+#include "eq_simpl.h"
+#include "input_output_func.h"
 
 typedef struct {
     

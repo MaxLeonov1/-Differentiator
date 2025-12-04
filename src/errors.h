@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 typedef enum{
 
     TREE_OK = 0,
@@ -19,6 +17,3 @@ typedef enum{
     INVALID_TREE_IDX = 12,
 
 } DiffErr_t;
-
-const char* StatusCodeToStr (DiffErr_t status);
-//DiffErr_t   VerifyTree      (TreeNode_t* node);

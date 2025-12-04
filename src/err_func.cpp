@@ -1,6 +1,4 @@
-#include "errors.h"
-#include "differentiator.h"
-#include "tree.h"
+#include "err_func.h"
 
 
 
