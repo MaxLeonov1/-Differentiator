@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "dump_tex.h"
 #include "logger.h"
 
 
 
-static void HandleNum          (TreeNode_t* node, FILE* file);
-static void HandleVar          (TreeNode_t* node, FILE* file, Diff_t* diff);
-static void HandleOpersBin     (TreeNode_t* node, TreeNode_t* prev_node, FILE* file, Diff_t* diff);
-static void HandleOpersUn      (TreeNode_t* node, TreeNode_t* prev_node, FILE* file, Diff_t* diff);
+static void HandleNum      (TreeNode_t* node, FILE* file);
+static void HandleVar      (TreeNode_t* node, FILE* file, Diff_t* diff);
+static void HandleOpersBin (TreeNode_t* node, FILE* file, Diff_t* diff);
+static void HandleOpersUn  (TreeNode_t* node, FILE* file, Diff_t* diff);
 
 
 
@@ -65,25 +66,39 @@ void PrintTexLogHeader() {
 
 
 
-void PrintSectionHeaderToTex(const char* title) {
+void PrintSectionHeaderToTex(const char* title, ...) {
     
     FILE* file = GetTexFile();
     if (file == nullptr) return;
 
-    fprintf(file, "\\section*{%s}\n\n", title);
+    if (title != nullptr) {
+        va_list args;
+        va_start(args, title);
+        fprintf(file, "\\section*{");
+        vfprintf(file, title, args);
+        fprintf(file, "}\n\n");
+        va_end(args);
+    }
     
     fclose(file);
 }
 
 
 
-void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes ) {
+void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes, ... ) {
 
     FILE* file = GetTexFile();
     if ( file == nullptr ) return;
 
-    //fprintf(file, "Let's find derivative for: [i don't want to do this]\n");
-    fprintf(file, "%s\n", mes);
+    if (mes != nullptr) {
+        va_list args;
+        va_start(args, mes);
+
+        vfprintf(file, mes, args);
+        
+        va_end(args);
+    }
+    
     fprintf(file, "\\begin{dmath*} \n");
     TreeDumpTex(root, nullptr, file, diff);
     fprintf(file, " \n\\end{dmath*}\n\n");
@@ -95,16 +110,29 @@ void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes ) {
 
 
 
-void PrintMesAndTaylorEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes,
-                               double x0, int deg) {
+void PrintMesAndTaylorEqToTex (Diff_t* diff, TreeNode_t* root, double x0, int deg,
+                               const char* mes, ...) {
 
     FILE* file = GetTexFile();
     if ( file == nullptr ) return;
 
-    fprintf(file, "%s\n", mes);
+    if (mes != nullptr) {
+        va_list args;
+        va_start(args, mes);
+
+        vfprintf(file, mes, args);
+        
+        va_end(args);
+    }
+
     fprintf(file, "\\begin{dmath*} \n");
     TreeDumpTex(root, nullptr, file, diff);
-    fprintf(file, "+o((x-%lf)^{%d})", x0, deg);
+
+    if (double_cmp(x0, 0)) 
+        fprintf(file, "+o(x^{%d})", x0, deg);
+    else
+        fprintf(file, "+o((x-%lg)^{%d})", x0, deg);
+
     fprintf(file, " \n\\end{dmath*}\n\n");
     
     fclose(file);
@@ -197,12 +225,12 @@ void TreeDumpTex (TreeNode_t* node, TreeNode_t* prev_node, FILE* file, Diff_t* d
 
         case Node_t::OP_BIN:
             if (parent_priority > node_priority) fprintf(file, "(");
-            HandleOpersBin(node, prev_node, file, diff);
+            HandleOpersBin(node, file, diff);
             if (parent_priority > node_priority) fprintf(file, ")");
             break;
 
         case Node_t::OP_UN:
-            HandleOpersUn(node, prev_node, file, diff);
+            HandleOpersUn(node, file, diff);
             break;
     }
 
@@ -226,7 +254,7 @@ static void HandleVar (TreeNode_t* node, FILE* file, Diff_t* diff) {
 
 
 
-static void HandleOpersBin (TreeNode_t* node, TreeNode_t* prev_node, FILE* file, Diff_t* diff) {
+static void HandleOpersBin (TreeNode_t* node, FILE* file, Diff_t* diff) {
 
     if (node->data.oper == Oper_t::DIV) {
         fprintf(file, "\\frac{ ");
@@ -259,7 +287,7 @@ static void HandleOpersBin (TreeNode_t* node, TreeNode_t* prev_node, FILE* file,
 
 
 
-static void HandleOpersUn (TreeNode_t* node, TreeNode_t* prev_node, FILE* file, Diff_t* diff) {
+static void HandleOpersUn (TreeNode_t* node, FILE* file, Diff_t* diff) {
 
     fprintf(file, " \\%s(", diff->def_op_instr[node->data.oper].name);
     TreeDumpTex(node->right, node, file, diff);

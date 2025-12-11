@@ -33,7 +33,8 @@
 #define CU_(oper, right ) CreateUnOp(oper, right)
 #define CN_(cR_ ) CreateNumNode(cR_)
 
-#define DUMP_TEX_ CreateTexLog(diff, node, d_node);
+#define DUMP_TEX_ if (diff->params.dir.cur_degree <= MAX_DEG_FOR_TEX_DIR_ ) \
+                      CreateTexLog(diff, node, d_node);
 
 /*=====================================================================================*/
 
@@ -42,6 +43,7 @@ TreeNode_t* DiffNum(TreeNode_t* node, int dir_var, Diff_t* diff) {
 }
 
 TreeNode_t* DiffVar(TreeNode_t* node, int dir_var, Diff_t* diff) {
+    //printf("%d %d\n", node->data.var_idx, dir_var);
     if (node->data.var_idx == dir_var)
         return CN_(1);
     else 
@@ -78,12 +80,16 @@ TreeNode_t* DiffDeg(TreeNode_t* node, int dir_var, Diff_t* diff, DiffErr_t* stat
     TreeNode_t* d_node = nullptr;
     
     if(nR_->type == Node_t::NUM) {
-        d_node = CB_(MUL_, cR_, CB_(DEG_, cL_, CB_(SUB_, cR_, CN_(1)))); 
+        d_node = CB_(MUL_, 
+                     CB_(MUL_, cR_, CB_(DEG_, cL_, CB_(SUB_, cR_, CN_(1)))),
+                     dL_ ); 
         DUMP_TEX_
         return d_node;
 
     } else if(nL_->type == Node_t::NUM) {
-        d_node = CB_(MUL_, CB_(DEG_, cL_, cR_), CU_(LN_, cL_));
+        d_node = CB_(MUL_,
+                     CB_(MUL_, CB_(DEG_, cL_, cR_), CU_(LN_, cL_)),
+                     dR_);
         DUMP_TEX_
         return d_node;
 

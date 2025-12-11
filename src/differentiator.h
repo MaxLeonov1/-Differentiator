@@ -96,6 +96,8 @@ typedef struct {
 
 typedef struct {
 
+    int make;
+
     double x_max;
     double x_min;
     double y_max;
@@ -105,10 +107,40 @@ typedef struct {
 
 typedef struct {
 
-    int simpl_tree;
-    Graph_t graph;
+    int make;
 
-} LogParams_t;
+    double x0;
+
+} Taylor_t;
+
+typedef struct {
+
+    int make;
+
+    int  cur_degree;
+    int  degree;
+    char var;
+
+} Derivative_t;
+
+typedef struct {
+
+    int make;
+
+    double x0;
+
+} Tangent_t;
+
+typedef struct {
+
+    int simpl_tree;
+
+    Graph_t      graph;
+    Taylor_t     taylor;
+    Derivative_t dir;
+    Tangent_t    tan;
+
+} Params_t;
 
 typedef struct {
 
@@ -123,7 +155,7 @@ typedef struct {
 
     NameTable_t name_table;
 
-    LogParams_t log_params;
+    Params_t params;
 
 } Diff_t;
 
@@ -139,13 +171,28 @@ typedef struct {
         .num = 0,                       \
         .buff = nullptr,                \
     },                                  \
-    .log_params = {                     \
+    .params = {                         \
         .simpl_tree = 0,                \
         .graph = {                      \
+            .make = 0,                  \
             .x_max = 0,                 \
             .x_min = 0,                 \
             .y_max = 0,                 \
             .y_min = 0,                 \
+        },                              \
+        .taylor = {                     \
+            .make = 0,                  \
+            .x0 = 0,                    \
+        },                              \
+        .dir = {                        \
+            .make = 0,                  \
+            .cur_degree = 0,            \
+            .degree = 0,                \
+            .var = 0,                   \
+        },                              \
+        .tan = {                        \
+            .make = 0,                  \
+            .x0 = 0,                    \
         },                              \
     },                                  \
 };                                      

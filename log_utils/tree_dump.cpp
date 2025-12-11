@@ -194,7 +194,7 @@ int PrintGraphNodes(TreeNode_t* node, int rank, FILE* graph_text, Diff_t* diff) 
             break;
     }
 
-    if (diff->log_params.simpl_tree)
+    if (diff->params.simpl_tree)
         fprintf(
             graph_text, 
             "node_%d[shape=Mrecord, rank=%d, %s"

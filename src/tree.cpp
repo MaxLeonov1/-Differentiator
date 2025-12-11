@@ -80,7 +80,7 @@ DiffErr_t InsertNode ( TreeNode_t** node, Val_t value, Node_t node_t ){
 
     TreeNode_t* node_new = nullptr;
     status = AllocNode(&node_new, node_t);
-    TREE_STAT_CHECK_
+    STAT_CHECK_
 
     switch(node_t) {
 

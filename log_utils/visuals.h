@@ -4,6 +4,8 @@
 #include "../src/input_output_func.h"
 
 
+#define GRAPH_NAME_ "output_graph.pdf"
+
 
 static const char* GraphCol[] = {
     "blue",

@@ -34,7 +34,7 @@ DiffErr_t AddGraphToPlotPDF(Diff_t* diff, TreeNode_t* root, const char* output_f
 
     if (diff->name_table.num>=1 && diff->name_table.num<2) {
         status = CreatePlotData(diff, data_fp, root, points, var_idx);
-        TREE_STAT_CHECK_
+        STAT_CHECK_
     } else
         return DiffErr_t::VAR_PLOT_ERR;
     
@@ -59,10 +59,10 @@ DiffErr_t AddGraphToPlotPDF(Diff_t* diff, TreeNode_t* root, const char* output_f
             "set key box\n"
             "plot",
             output_filedir,
-            diff->log_params.graph.x_min,
-            diff->log_params.graph.x_max,
-            diff->log_params.graph.y_min,
-            diff->log_params.graph.y_max);
+            diff->params.graph.x_min,
+            diff->params.graph.x_max,
+            diff->params.graph.y_min,
+            diff->params.graph.y_max);
     }
     
     fprintf(script_fp, " '%s' with lines linewidth 2 linecolor rgb '%s' title '", 
@@ -109,8 +109,8 @@ static DiffErr_t CreatePlotData (Diff_t* diff, FILE* data_file, TreeNode_t* root
     _OK_STAT_
 
     double original_x = diff->name_table.buff[var_idx].val;
-    double x_max = diff->log_params.graph.x_max;
-    double x_min = diff->log_params.graph.x_min;
+    double x_max = diff->params.graph.x_max;
+    double x_min = diff->params.graph.x_min;
     
     double step = (x_max - x_min) / (points - 1);
     for (int i = 0; i < points; i++) {

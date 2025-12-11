@@ -22,10 +22,10 @@ static const char* RndLinkWords[] = {
 
 void PrintTexLogHeader  ();
 void TreeDumpTex        (TreeNode_t* node, TreeNode_t* prev_node, FILE* file, Diff_t* diff);
-void PrintSectionHeaderToTex(const char* title);
-void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes );
-void PrintMesAndTaylorEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes,
-                               double x0, int deg);
+void PrintSectionHeaderToTex(const char* title, ...);
+void PrintMesAndEqToTex (Diff_t* diff, TreeNode_t* root, const char* mes, ... );
+void PrintMesAndTaylorEqToTex (Diff_t* diff, TreeNode_t* root, double x0, int deg,
+                               const char* mes, ... );
 void CreateTexLog       (Diff_t* diff, TreeNode_t* root, TreeNode_t* d_root);
 void PutImgToLog        (Diff_t* diff, const char* img_filename );
 void CloseTexLog        ();

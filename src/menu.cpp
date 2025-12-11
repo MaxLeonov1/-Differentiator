@@ -8,6 +8,10 @@
 
 static void AskAboutDiffDeg (Diff_t* diff, int* dir_deg, int* dir_var);
 
+static void ProcessDifferentiation (Diff_t* diff, DiffErr_t* status);
+static void ProcessTaylor          (Diff_t* diff, DiffErr_t* status);
+static void ProcessTangent         (Diff_t* diff, DiffErr_t* status);
+
 
 
 void ShowCmdOp() {
@@ -37,7 +41,7 @@ CmdLineArgs ParseCmdLineArgs (int argc, char* argv[], Diff_t* diff) {
         } else if (strcmp(argv[i], "-h") == 0) {
             ShowCmdOp();
         } else if (strcmp(argv[i], "-st") == 0) {
-            diff->log_params.simpl_tree = 1;
+            diff->params.simpl_tree = 1;
         }
 
     }
@@ -80,8 +84,19 @@ MenuOption GetMenuChoice() {
         break;                                            \
     }
 
+#define SAVED_EXPR_IDX_ 0
+#define DIR_VAR_ diff->params.dir.var
+#define DIR_DEG_ diff->params.dir.degree
+#define TLR_X0_  diff->params.taylor.x0
+#define TAN_X0_  diff->params.tan.x0
+
 void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLineArgs* args) {
-    int expr_idx = 0, dir_var = 0;
+    int    expr_idx = 0;
+    int    dir_var  = diff->params.dir.var;
+    int    dir_deg  = diff->params.dir.degree;
+    double tlr_x0   = diff->params.taylor.x0;
+    double tan_x0   = diff->params.tan.x0;
+
     
     switch (choice) {
         case MenuOption::READ_FILE: {
@@ -100,7 +115,9 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
                                "So we have this equation, and we are going to do "
                                "something with it [at this moment i dont know what"
                                " **** we are going to involve this equation to]");
-
+            if (diff->params.graph.make) {                   
+                QuickPlotPDF(diff, diff->forest[0]->root, GRAPH_NAME_, dir_var);
+            }
             TreeDump(diff, 0, *status, nullptr);
             break;
         }    
@@ -117,6 +134,7 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
             if (*status == DiffErr_t::TREE_OK) {
                 printf("Expression saved successfully\n");
             }
+
             break;
         }   
         case MenuOption::DIFFERENTIATE: {
@@ -129,7 +147,7 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
 
             AskAboutDiffDeg(diff, &dir_deg, &dir_var);
 
-            *status = FindDerivative(diff, expr_idx, dir_var, dir_deg, status);
+            *status = FindDerivative(diff, expr_idx, dir_var, dir_deg);
 
             if (*status == DiffErr_t::TREE_OK)
                 printf("Differentiation completed\n");
@@ -155,42 +173,25 @@ void HandleMenuChoice(Diff_t* diff, MenuOption choice, DiffErr_t* status, CmdLin
         }    
         case MenuOption::STD_WORKING_MODE: {
             NO_LOAD_TERM_
-            
-            int dir_deg = 0;
 
-            AskAboutDiffDeg(diff, &dir_deg, &dir_var);
+            for (size_t i = 0; i<diff->name_table.num; i++) {
+                if (DIR_VAR_ == diff->name_table.buff[i].name) {
+                    DIR_VAR_ = i;
+                    break;
+                }
+            }
 
-            *status = FindDerivative(diff, expr_idx, dir_var, dir_deg, status);
+            if (diff->params.dir.make) {
+                ProcessDifferentiation (diff, status);
 
-            if (*status == DiffErr_t::TREE_OK)
-                printf("Differentiation completed\n");
-            
-            _IF_DEBUG(TreeDump(diff, 0, *status, nullptr);)
+                if (diff->params.taylor.make)
+                    ProcessTaylor (diff, status);
+                if (diff->params.tan.make)
+                    ProcessTangent (diff, status);
+            }
 
-            int x0 = 0;
-            printf("Enter decomposition point for Taylor series:\n");
-            scanf("%d", &x0);
-
-            *status = CreateTaylorSeriesEquation(diff, 0, dir_deg, dir_var, x0);
-            if (*status != DiffErr_t::TREE_OK) return;
-
-            
-            PrintSectionHeaderToTex("Getting Taylor Series!");
-            PrintMesAndEqToTex(diff, diff->forest[0]->root,
-                               "No one asked, but we will find Taylor series for this equation:");
-            PrintMesAndTaylorEqToTex(diff, diff->forest[dir_deg+1]->root,
-                                     "Using our derivatives, we obtain:",
-                                     x0, dir_deg );
-            SimplTree(diff, dir_deg+1);
-            PrintMesAndTaylorEqToTex(diff, diff->forest[dir_deg+1]->root,
-                                     "So, we have simplified Taylor series:",
-                                     x0, dir_deg );
-
-            _IF_DEBUG(TreeDump(diff, dir_deg+1, *status, nullptr);)
-            QuickPlotPDF(diff, diff->forest[0]->root, "output_graph.pdf", dir_var);
-            QuickPlotPDF(diff, diff->forest[dir_deg+1]->root, "output_graph.pdf", dir_var);
             CreatePlotPDF();
-            PutImgToLog(diff, "output_graph.pdf");
+            PutImgToLog(diff, GRAPH_NAME_);
             break;
         }    
         case MenuOption::EXIT: {
@@ -233,3 +234,82 @@ static void AskAboutDiffDeg (Diff_t* diff, int* dir_deg, int* dir_var) {
     } while (!is_found);
 
 }
+
+
+
+static void ProcessDifferentiation (Diff_t* diff, DiffErr_t* status ){
+
+    assert(diff);
+
+    *status = FindDerivative(diff, SAVED_EXPR_IDX_, DIR_VAR_, DIR_DEG_);
+
+    if (*status == DiffErr_t::TREE_OK)
+        printf("Differentiation completed\n");
+    else
+        return;
+            
+    _IF_DEBUG(TreeDump(diff, SAVED_EXPR_IDX_, *status, nullptr);)
+
+} 
+
+
+
+static void ProcessTaylor (Diff_t* diff, DiffErr_t* status ) {
+
+    assert(diff);
+
+    *status = CreateTaylorSeriesEquation(diff, SAVED_EXPR_IDX_, DIR_DEG_, DIR_VAR_, TLR_X0_);
+            
+    if (*status == DiffErr_t::TREE_OK)
+        printf("Taylor series created\n");
+    else
+        return;
+            
+    PrintSectionHeaderToTex("Getting Taylor Series!");
+    PrintMesAndEqToTex(diff, diff->forest[SAVED_EXPR_IDX_]->root,
+                       "No one asked, but we will find Taylor series for this equation:");
+    PrintMesAndTaylorEqToTex(diff, diff->forest[DIR_DEG_+1]->root,
+                             TLR_X0_, DIR_DEG_,
+                             "Using our derivatives, we obtain:");
+    SimplTree(diff, DIR_DEG_+1);
+    PrintMesAndTaylorEqToTex(diff, diff->forest[DIR_DEG_+1]->root,
+                             TLR_X0_, DIR_DEG_,
+                             "So, we have simplified Taylor series at $x_0$:%lg,"
+                             " with accuracy: $o(x-%lg)^{%d}$",
+                             TLR_X0_, TLR_X0_, DIR_DEG_);
+
+    _IF_DEBUG(TreeDump(diff, diff->tree_num-1, *status, nullptr);)
+    if(diff->params.graph.make)
+        QuickPlotPDF(diff, diff->forest[diff->tree_num-1]->root, GRAPH_NAME_, DIR_VAR_);
+
+}
+
+
+
+static void ProcessTangent (Diff_t* diff, DiffErr_t* status ) {
+
+    assert(diff);
+
+    *status = ConstructTangentToTex(diff, SAVED_EXPR_IDX_, SAVED_EXPR_IDX_+1, TAN_X0_, DIR_VAR_);
+
+    if (*status == DiffErr_t::TREE_OK)
+        printf("Tangent created\n");
+    else
+        return;
+
+    PrintSectionHeaderToTex("Finding tangent");
+    _IF_DEBUG( TreeDump(diff, diff->tree_num-1, *status, NULL));
+    PrintMesAndEqToTex(diff, diff->forest[diff->tree_num-1]->root,
+                       "Using some mysterious dark magic we summoned the TANGENT equation "
+                       "at point of x=%lg", TAN_X0_);
+
+    if(diff->params.graph.make)
+        QuickPlotPDF(diff, diff->forest[diff->tree_num-1]->root, GRAPH_NAME_, DIR_VAR_);
+
+}
+
+#undef SAVED_EXPR_IDX_
+#undef DIR_VAR_ 
+#undef DIR_DEG_ 
+#undef TLR_X0_  
+#undef TAN_X0_  

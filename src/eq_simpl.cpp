@@ -1,6 +1,7 @@
 #include "math.h"
 
 #include "tree.h"
+#include "tree_dump.h"
 #include "eq_simpl.h"
 #include "../utils/sup_func.h"
 #include "../utils/colors.h"
@@ -43,7 +44,8 @@ int TryEvalConstTree(TreeNode_t* node, double* result) {
             
         case VAR:
             return 0;
-            
+
+        case OP_UN:
         case OP_BIN: {
             double left_val = 0, right_val = 0;
             
@@ -69,18 +71,6 @@ int TryEvalConstTree(TreeNode_t* node, double* result) {
                     case DEG:
                         *result = pow(left_val, right_val);
                         return 1;
-                    default:
-                        return 0;
-                }
-            }
-            return 0;
-        }
-            
-        case OP_UN: {
-            double right_val = 0;
-            
-            if (EvR_) {
-                switch (node->data.oper) {
                     case SIN:
                         *result = sin(right_val);
                         return 1;
@@ -106,8 +96,7 @@ int TryEvalConstTree(TreeNode_t* node, double* result) {
                 }
             }
             return 0;
-        }
-            
+        }    
         default:
             return 0;
     }
@@ -204,7 +193,7 @@ TreeNode_t* SimplTrivleCases(TreeNode_t* node, int* simpl){
 #undef _X_DEG_1_
 
 /*=====================================================================================*/
-#include "tree_dump.h"
+
 DiffErr_t SimplTree(Diff_t* diff, int tree_idx) {
 
     _OK_STAT_
@@ -214,12 +203,10 @@ DiffErr_t SimplTree(Diff_t* diff, int tree_idx) {
         simpl = 0;
         diff->forest[tree_idx]->root = SimplConstTree(diff->forest[tree_idx]->root, &simpl);
         diff->forest[tree_idx]->root = SimplTrivleCases(diff->forest[tree_idx]->root, &simpl);
+        _IF_DEBUG(TreeDump(diff, tree_idx, status, nullptr);)
+        //printf("%d %d\n", simpl, tree_idx);
 
     } while(simpl);
-    PrintMesAndEqToTex(
-        diff, diff->forest[tree_idx]->root,
-        "After some simple mathematical transformations,"
-        "which we leave to the attentive reader as a simple problem, we obtain:" );
 
     _RET_OK_
 }

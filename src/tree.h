@@ -114,7 +114,7 @@ TreeNode_t* CreateVarNode ( int var_idx);
         return status;                     \
     }
 
-#define TREE_STAT_CHECK_                              \
+#define STAT_CHECK_                              \
     if ( status != DiffErr_t::TREE_OK ) return status; \
 
 #define SKIP_SPACE_ while (buffer[*pos] == ' ') (*pos)++;

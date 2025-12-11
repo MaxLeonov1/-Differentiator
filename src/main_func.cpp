@@ -6,25 +6,42 @@
 /*=====================================================================================*/
 
 static TreeNode_t* CreateTaylorElem(Diff_t* diff, int var_idx, double x0, int k, double fk_x0);
+static TreeNode_t* ConstructTangentEquation(Diff_t* diff, DiffErr_t* status,
+                                            int var_idx, double x0, double f1_x0, double f_x0 );
 
 /*=====================================================================================*/
 
-DiffErr_t FindDerivative ( Diff_t* diff, int inp_eq_idx, int dir_var, int dir_deg, DiffErr_t* status ) {
+DiffErr_t FindDerivative ( Diff_t* diff, int inp_eq_idx, int dir_var, int dir_deg) {
 
     assert(diff);
     assert(diff->forest[inp_eq_idx]);
 
+    _OK_STAT_
+
     for(size_t i = 1; i <= dir_deg; i++) {
 
-        PrintSectionHeaderToTex("Finding another derivative");
-        PrintMesAndEqToTex(
-            diff, diff->forest[inp_eq_idx]->root,
-            "Let's find derivative for: [i don't want to do this]");
+        diff->params.dir.cur_degree++;
+        if(diff->params.dir.cur_degree <= MAX_DEG_FOR_TEX_DIR_) {
+            PrintSectionHeaderToTex("Finding %d derivative", i);
+            PrintMesAndEqToTex(
+                diff, diff->forest[inp_eq_idx]->root,
+                "Let's find derivative for: [i don't want to do this]");
+        }
 
-        int out_eq_idx = AddEquation(diff, status);
-        diff->forest[out_eq_idx]->root = Differentiate ( diff->forest[inp_eq_idx]->root, dir_var, diff, status);
+        int out_eq_idx = AddEquation(diff, &status);
+        STAT_CHECK_
+        diff->forest[out_eq_idx]->root = Differentiate ( diff->forest[inp_eq_idx]->root, dir_var, diff, &status);
         inp_eq_idx = out_eq_idx;
-        *status = SimplTree(diff, diff->tree_num - 1);
+        
+        status = SimplTree(diff, diff->tree_num - 1);
+        STAT_CHECK_
+
+        if(diff->params.dir.cur_degree <= MAX_DEG_FOR_TEX_DIR_)
+            PrintMesAndEqToTex(
+                diff, diff->forest[diff->tree_num - 1]->root,
+                "After some simple mathematical transformations,"
+                "which we leave to the attentive reader as a simple problem, we obtain:" );
+
     }
     _RET_OK_
 
@@ -140,6 +157,8 @@ double CalcTree(TreeNode_t* node, Diff_t* diff, DiffErr_t* status) {
 
 static TreeNode_t* CreateTaylorElem(Diff_t* diff, int var_idx, double x0, int k, double fk_x0) {
 
+    assert(diff);
+
     if (k == 0) {
         return CreateNumNode(fk_x0);
     }
@@ -199,16 +218,16 @@ static TreeNode_t* CreateTaylorElem(Diff_t* diff, int var_idx, double x0, int k,
         TreeNode_t* fk_node = CreateNumNode(fk_x0);
         TreeNode_t* fact_node = CreateNumNode((double)factorial_k);
         if (!fk_node || !fact_node) {
-            if (fk_node) DeleteNode(fk_node);
+            if (fk_node)   DeleteNode(fk_node);
             if (fact_node) DeleteNode(fact_node);
-            if (degree) DeleteNode(degree);
+            DeleteNode(degree);
             return nullptr;
         }
         coeff = CreateBinOp(Oper_t::DIV, fk_node, fact_node);
         if (!coeff) {
             DeleteNode(fk_node);
             DeleteNode(fact_node);
-            if (degree) DeleteNode(degree);
+            DeleteNode(degree);
             return nullptr;
         }
     }
@@ -252,7 +271,7 @@ DiffErr_t CreateTaylorSeriesEquation( Diff_t* diff, int func_tree_idx, int n,
  
     TreeNode_t* taylor_tree = nullptr;
     
-    for (int k = 0; k < n; k++) {
+    for (int k = 0; k <= n; k++) {
     
         int deriv_idx = func_tree_idx + k;
         TreeNode_t* deriv_tree = diff->forest[deriv_idx]->root;
@@ -287,6 +306,95 @@ DiffErr_t CreateTaylorSeriesEquation( Diff_t* diff, int func_tree_idx, int n,
     diff->forest[result_tree_idx]->root = taylor_tree;
     //TreeDump(diff, result_tree_idx, status, nullptr);
     return DiffErr_t::TREE_OK;
+}
+
+/*=====================================================================================*/
+
+DiffErr_t ConstructTangentToTex(Diff_t* diff, int eq_idx, int dir_eq_idx, double x0, int var_idx) {
+
+    assert(diff);
+    _OK_STAT_
+
+    if (dir_eq_idx >= diff->tree_num || eq_idx >= diff->tree_num )
+        return DiffErr_t::INVALID_TREE_IDX;
+
+    double f_x0 = CalcTreeAtPoint(diff, diff->forest[eq_idx]->root, var_idx, x0, &status);
+    STAT_CHECK_
+    double f1_x0 = CalcTreeAtPoint(diff, diff->forest[dir_eq_idx]->root, var_idx, x0, &status);
+    STAT_CHECK_
+    TreeNode_t* tangent = ConstructTangentEquation(diff, &status, var_idx, x0, f1_x0, f_x0);
+    if (!tangent) return status;
+
+    int tangent_idx = AddEquation(diff, &status);
+    STAT_CHECK_
+
+    diff->forest[tangent_idx]->root = tangent;
+    _RET_OK_
+}
+
+/*=====================================================================================*/
+
+static TreeNode_t* ConstructTangentEquation(Diff_t* diff, DiffErr_t* status,
+                                            int var_idx, double x0, double f1_x0, double f_x0 ) {
+
+    assert(diff);
+
+    //f'(x0)
+    TreeNode_t* dir_node = CreateNumNode(f1_x0);
+    if (!dir_node) {
+        *status = DiffErr_t::MEM_ALLOC_ERR;
+        return nullptr;
+    }
+
+    TreeNode_t* x_node  = CreateVarNode(var_idx);
+    TreeNode_t* x0_node = CreateNumNode(x0);
+    if (!x0_node || !x_node) {
+        DeleteNode(dir_node);
+        if (x0_node) DeleteNode(x0_node);
+        if (x_node)  DeleteNode(x_node);
+        *status = DiffErr_t::MEM_ALLOC_ERR;
+        return nullptr;
+    }
+
+    //(x-x0)
+    TreeNode* x_sub_x0 = CreateBinOp(Oper_t::SUB, x_node, x0_node);
+    if (!x_sub_x0) {
+        DeleteNode(dir_node);
+        DeleteNode(x0_node);
+        DeleteNode(x_node);
+        *status = DiffErr_t::MEM_ALLOC_ERR;
+        return nullptr;
+    }
+
+    //f'(x0)(x-x0)
+    TreeNode_t* mult = CreateBinOp(Oper_t::MULT, dir_node, x_sub_x0);
+    if (!mult) {
+        DeleteNode(x_sub_x0);
+        DeleteNode(dir_node);
+        *status = DiffErr_t::MEM_ALLOC_ERR;
+        return nullptr;
+    }
+
+    //f'(x0)(x-x0) + f(x0)
+    if (f_x0 == 0) {
+        TreeNode_t* result = mult;
+        return result;
+
+    } else {
+
+        TreeNode_t* f_x0_node = CreateNumNode(f_x0);
+        TreeNode_t* result = CreateBinOp(Oper_t::ADD, mult, f_x0_node);
+        if (!result || !f_x0_node) {
+
+            if (f_x0_node) DeleteNode(f_x0_node);
+            if (result)    DeleteNode(result);
+            if (!result)   DeleteNode(mult);
+            if (!result)   DeleteNode(f_x0_node);
+            *status = DiffErr_t::MEM_ALLOC_ERR;
+        }
+        return result;
+    }
+
 }
 
 /*=====================================================================================*/
